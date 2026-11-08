@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>حلقة for ودالة range</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@500;600;800&display=swap" rel="stylesheet">
+<style>
+/* اتجاه التصميم: غرفة تحكم مرورية هادئة — شريط إشارات، بطاقات بيضاء، ومحرر داكن */
+:root{
+  --ink:#12203f; --ink2:#506082; --paper:#f2f4fa; --card:#ffffff; --line:#d8deec; --soft:#eaeefa;
+  --brand:#2750d8; --brand2:#1b3aa8;
+  --go:#12a150; --go-bg:#e4f6ec; --wait:#e89b00; --wait-bg:#fff2d2; --stop:#d8343a; --stop-bg:#fde7e8;
+  --code:#0f1729; --code2:#18223b; --code-ink:#e8eefb;
+  --f-body:"Thmanyah Sans","thmanyah","ثمانية","Tajawal","Segoe UI","Noto Sans Arabic",Tahoma,sans-serif; --f-mono:"JetBrains Mono","Consolas","Courier New",monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:17px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-weight:500;line-height:1.7;min-height:100%}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.en{direction:ltr;unicode-bidi:isolate;display:inline-block;font-family:var(--f-body);font-weight:800;letter-spacing:.6px}
+.muted{color:var(--ink2)}
+bdi.c{font-family:var(--f-mono);font-size:.86em;background:var(--soft);border-radius:6px;padding:0 6px;direction:ltr;unicode-bidi:isolate;color:#1c3796;white-space:nowrap}
+
+/* شريط علوي */
+.bar{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;border-bottom:4px solid transparent;border-image:linear-gradient(90deg,var(--stop) 0 33.3%,var(--wait) 33.3% 66.6%,var(--go) 66.6%) 1}
+.bar-in{max-width:1120px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.05rem;text-align:start}
+.logo svg{flex:none}
+.logo small{display:block;font-weight:500;opacity:.7;font-size:.78rem;line-height:1.2}
+.prog{margin-inline-start:auto;display:flex;align-items:center;gap:10px;font-size:.85rem}
+.prog .track{width:130px;height:8px;border-radius:99px;background:rgba(255,255,255,.2);overflow:hidden}
+.prog .track i{display:block;height:100%;background:var(--go);border-radius:99px;transition:width .5s}
+.tb{padding:6px 12px;border-radius:10px;background:rgba(255,255,255,.12);font-size:.85rem;font-weight:700}
+.tb:hover{background:rgba(255,255,255,.22)}
+main{max-width:1120px;margin:0 auto;padding:22px 20px 70px}
+
+/* الرئيسية */
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:center;margin-bottom:34px}
+.hero h1{font-size:clamp(2rem,4.6vw,3.1rem);line-height:1.2;font-weight:800;text-wrap:balance}
+.hero p{margin-top:12px;color:var(--ink2);font-size:1.08rem;max-width:34em}
+.hero .acts{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}
+.hero .sig{justify-self:center;background:var(--ink);border-radius:26px;padding:20px 26px;display:flex;gap:22px;align-items:center;color:#fff;box-shadow:0 10px 0 #0a1330}
+.hero .sig svg{display:block}
+.hero .rules{font-size:.82rem;display:grid;gap:8px;max-width:180px;line-height:1.4}
+.hero .rules b{display:block;font-size:.9rem}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:14px;background:var(--brand);color:#fff;font-weight:800;box-shadow:0 5px 0 var(--brand2);transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--brand2)}
+.btn.ghost{background:var(--card);color:var(--ink);border:2px solid var(--line);box-shadow:0 5px 0 var(--line)}
+.btn.go{background:var(--go);box-shadow:0 5px 0 #0c7a3c}
+.btn.sm{padding:7px 16px;font-size:.9rem;box-shadow:0 3px 0 var(--brand2);border-radius:11px}
+.btn.ghost.sm{box-shadow:0 3px 0 var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.sec{margin-top:30px}
+.sec-h{display:flex;align-items:baseline;gap:14px;margin-bottom:14px;border-bottom:2px solid var(--line);padding-bottom:8px}
+.sec-h .k{font:800 .8rem var(--f-body);background:var(--ink);color:#fff;border-radius:8px;padding:2px 10px;letter-spacing:1px}
+.sec-h h2{font-size:1.45rem}
+.sec-h span.s{color:var(--ink2);font-size:.9rem;direction:ltr;unicode-bidi:isolate}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.st{position:relative;text-align:start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px 16px 16px;display:grid;gap:8px;border-inline-start:8px solid var(--c);box-shadow:0 2px 0 var(--line);transition:transform .12s,box-shadow .12s}
+.st:hover{transform:translateY(-3px);box-shadow:0 8px 0 var(--line)}
+.st .top{display:flex;align-items:center;gap:10px}
+.st .n{width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+.st .e{font-size:.72rem;color:var(--ink2)}
+.st h3{font-size:1.15rem;line-height:1.35}
+.st p{font-size:.88rem;color:var(--ink2);line-height:1.5}
+.st .meta{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--ink2)}
+.dots{display:flex;gap:4px;flex-wrap:wrap}
+.dots i{width:11px;height:11px;border-radius:50%;background:var(--line)}
+.dots i.d{background:var(--go)}
+.dots i.s{background:var(--wait)}
+
+/* صفحة المحطة */
+.crumb{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.crumb h1{font-size:1.5rem;line-height:1.3}
+.crumb .en{font-size:.75rem;color:#fff;background:var(--c);padding:2px 12px;border-radius:99px}
+.stepper{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 18px;align-items:center}
+.stepper button{width:38px;height:38px;border-radius:50%;background:var(--card);border:2px solid var(--line);font-weight:800;font-size:.9rem;position:relative;display:grid;place-items:center}
+.stepper button.on{background:var(--c);border-color:var(--c);color:#fff;transform:scale(1.1)}
+.stepper button.d{border-color:var(--go);color:var(--go)}
+.stepper button.on.d{color:#fff}
+.stepper .tr{width:auto;padding:0 14px;border-radius:99px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 5px 0 var(--line)}
+.qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.pill{font-size:.78rem;font-weight:800;border-radius:99px;padding:2px 12px;background:var(--soft);color:var(--ink2)}
+.stmt{font-size:clamp(1.25rem,2.8vw,1.75rem);line-height:1.75;font-weight:700;margin:8px 0}
+.code{direction:ltr;text-align:left;background:var(--code);color:var(--code-ink);border-radius:16px;padding:14px 18px;margin:12px 0;font:600 1.02rem/1.7 var(--f-mono);overflow:auto;box-shadow:0 4px 0 #070c1b;tab-size:4;white-space:pre}
+.outv{direction:ltr;text-align:left;background:#fff;border:2px dashed var(--line);border-radius:14px;padding:8px 14px;font:600 .98rem/1.65 var(--f-mono)}
+.outv .ln{unicode-bidi:plaintext;text-align:start}
+.t-c{color:#7f8db3;font-style:italic}.t-s{color:#9be28b}.t-k{color:#ff9d6b;font-weight:800}.t-f{color:#7ad1ff}.t-n{color:#f5d76e}
+.lesson-body{font-size:1.1rem}
+.lesson-body ul{margin:8px 0;padding-inline-start:22px}
+.lesson-body li{margin:4px 0}
+.ask{background:var(--wait-bg);border-radius:12px;padding:8px 14px;margin-top:10px}
+.note{margin-top:10px;font-weight:700;color:var(--brand2)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.pair .lbl{font-size:.8rem;font-weight:800;color:var(--ink2);margin-bottom:2px}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.sum3 div{background:var(--soft);border-radius:16px;padding:14px;display:grid;gap:4px}
+.sum3 b{font:800 1.3rem var(--f-mono);direction:ltr;text-align:start;color:var(--brand2)}
+.sum3 span{font-size:.95rem;line-height:1.5}
+
+/* خيارات الاستجابة */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.opts.four{grid-template-columns:repeat(2,1fr)}
+.o{border-radius:18px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:104px;background:var(--card);border:3px solid var(--line);box-shadow:0 5px 0 var(--line);font-weight:800;text-align:center;transition:transform .08s}
+.o:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--line)}
+.o.g{background:var(--go);border-color:#0c7a3c;color:#fff;box-shadow:0 5px 0 #0c7a3c}
+.o.y{background:var(--wait);border-color:#b57a00;color:#3a2700;box-shadow:0 5px 0 #b57a00}
+.o.r{background:var(--stop);border-color:#a71f25;color:#fff;box-shadow:0 5px 0 #a71f25}
+.o .sym{font-size:1.9rem;line-height:1}
+.o .sub{font-size:.76rem;font-weight:600;opacity:.9;line-height:1.3}
+.o.txt{flex-direction:row;justify-content:flex-start;text-align:start;gap:12px;padding:10px 14px}
+.o.txt .tx{font-size:1.08rem;font-weight:700;flex:1}
+.o .L{min-width:36px;height:36px;border-radius:11px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:Arial,sans-serif;font-weight:900}
+.o.pick{outline:5px solid var(--ink);outline-offset:3px}
+.o.dim{opacity:.35}
+.o.right{outline:5px solid var(--go);outline-offset:3px;opacity:1}
+.o.right:not(.g):not(.y):not(.r){background:var(--go-bg);border-color:var(--go)}
+.o svg.fig{height:78px;width:auto}
+.conf5{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.conf5 button{flex:1 1 130px;border:3px solid var(--line);border-radius:16px;background:var(--card);padding:8px;font-size:.82rem;font-weight:700;box-shadow:0 4px 0 var(--line)}
+.conf5 button b{display:block;font-size:1.5rem;color:var(--brand)}
+.actions{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:18px}
+.reveal{margin-top:18px;border-radius:18px;background:var(--soft);border:2px solid var(--brand);padding:14px 18px;animation:rise .35s both}
+.reveal .v{font-size:1.3rem;font-weight:800}
+.reveal .v.ok{color:var(--go)}.reveal .v.no{color:var(--stop)}
+.reveal .sb{margin-top:6px;background:#fff;border-radius:12px;padding:8px 14px;border-inline-start:6px solid var(--wait)}
+.reveal .sb.h{border-color:var(--go)}
+.lean{display:inline-block;border-radius:99px;padding:0 12px;color:#fff;font-weight:800;margin-inline-start:6px}
+.lean.g{background:var(--go)}.lean.y{background:var(--wait);color:#3a2700}.lean.r{background:var(--stop)}
+.tally{margin-top:12px;background:#fff;border-radius:14px;padding:8px 14px}
+.tally h4{margin:0 0 4px;font-size:.92rem}
+.trow{display:flex;align-items:center;gap:8px;margin:3px 0}
+.trow button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;font-weight:800}
+.trow .bar2{flex:1;height:16px;background:var(--soft);border-radius:99px;overflow:hidden}
+.trow .bar2 i{display:block;height:100%;transition:width .4s}
+.spin{display:grid;place-items:center;padding:6px}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+
+/* مختبر بايثون */
+.lab{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 5px 0 var(--line);overflow:hidden}
+.lab-h{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--code2);color:#fff;flex-wrap:wrap}
+.lab-h .snake{width:30px;height:30px;flex:none}
+.lab-h b{font-size:1.05rem}
+.lab-h .stt{margin-inline-start:auto;font-size:.82rem;font-weight:800;padding:2px 12px;border-radius:99px;background:rgba(255,255,255,.14)}
+.lab-h .stt.ok{background:var(--go)}
+.lab-b{padding:16px 20px 20px;display:grid;gap:14px}
+.task{font-size:1.1rem;font-weight:700;line-height:1.7}
+.lab-g{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:start}
+.ed{display:flex;direction:ltr;background:var(--code);border-radius:16px;overflow:hidden;box-shadow:0 4px 0 #070c1b}
+.gut{padding:12px 0;background:#0b1224;color:#5d6b92;text-align:right;font:500 .92rem/24px var(--f-mono);user-select:none;min-width:38px}
+.gut i{display:block;height:24px;padding:0 9px;font-style:normal}
+.gut i.bad{background:var(--stop);color:#fff}
+.wrap{position:relative;flex:1;min-width:0}
+.ed .hl,.ed textarea{margin:0;padding:12px 14px;font:600 .98rem/24px var(--f-mono);letter-spacing:0;white-space:pre;tab-size:4;direction:ltr;text-align:left;border:0}
+.ed .hl{position:absolute;inset:0;overflow:hidden;color:var(--code-ink);pointer-events:none}
+.ed textarea{position:relative;display:block;width:100%;min-height:168px;background:transparent;color:transparent;caret-color:#fff;resize:none;overflow-x:auto;overflow-y:hidden;outline-offset:-3px}
+.ed textarea::selection{background:rgba(110,150,255,.4);color:transparent}
+.side{display:grid;gap:12px}
+.box{border-radius:14px;border:2px solid var(--line);background:#fff;padding:8px 12px}
+.box .lbl{font-size:.78rem;font-weight:800;color:var(--ink2);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.box .outv{border:0;padding:2px 0;max-height:240px;overflow:auto;background:none}
+.box .lbl+div{margin-top:2px}
+.box.exp{background:var(--go-bg);border-color:#b5e3c8}
+.box.con{background:var(--code);border-color:var(--code);color:var(--code-ink)}
+.box.con .lbl{color:#9fb0d8}
+.box.con .outv{color:var(--code-ink)}
+.box.con .outv .ln{color:var(--code-ink)}
+#conb-x{}
+.box.con.bad{background:#2a1015;border-color:var(--stop)}
+.err{color:#ffb3b6;direction:rtl;text-align:start;line-height:1.6}
+.err code{font-family:var(--f-mono);direction:ltr;unicode-bidi:isolate;display:inline-block;background:rgba(255,255,255,.1);border-radius:6px;padding:0 6px;color:#ffd1d3}
+.err p{color:#fff;margin-top:4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;direction:ltr;margin-top:6px;align-items:center}
+.chips span{font:700 .85rem var(--f-mono);background:rgba(255,255,255,.14);border-radius:8px;padding:1px 9px}
+.chips em{font-style:normal;font-size:.76rem;opacity:.7;font-family:var(--f-body)}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.fb{border-radius:16px;padding:12px 16px;animation:rise .3s both}
+.fb.ok{background:var(--go-bg);border:2px solid #86d3a6}
+.fb.no{background:var(--wait-bg);border:2px solid #f0c56b}
+.fb.er{background:var(--stop-bg);border:2px solid #f0a0a4}
+.fb b.t{font-size:1.15rem}
+.fb .cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.fb .cmp div{background:#fff;border-radius:10px;padding:6px 10px}
+.fb .cmp .outv{border:0;padding:0}
+.outv .ln.diff{background:var(--stop-bg);border-radius:4px}
+.sol{border-radius:16px;background:var(--soft);padding:12px 16px;border:2px dashed var(--brand)}
+.sol .code{margin:8px 0}
+.hidden{display:none!important}
+
+/* ختام المحطة */
+.done{text-align:center}
+.done .stars{font-size:2.4rem;letter-spacing:8px;color:var(--wait)}
+.stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.stats div{background:var(--soft);border-radius:16px;padding:10px 20px;min-width:140px}
+.stats b{display:block;font-size:1.7rem;color:var(--brand)}
+
+/* نوافذ */
+#ov{position:fixed;inset:0;background:rgba(18,32,63,.9);display:none;place-items:center;z-index:60}
+#ov.on{display:grid}
+#ov .num{font:900 min(34vw,250px)/1 Arial,sans-serif;color:#fff;animation:zoom .7s both}
+@keyframes zoom{from{transform:scale(2.4);opacity:0}30%{opacity:1}to{transform:scale(1)}}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:50;padding:16px}
+#modal.on{display:grid}
+#modal .card{max-width:640px;max-height:88vh;overflow:auto}
+#modal li{margin:6px 0}
+.cf{position:fixed;top:-20px;width:11px;height:15px;z-index:70;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+svg.fig{overflow:visible;animation:breathe 1.9s ease-in-out infinite}
+@keyframes breathe{50%{transform:translateY(-3px)}}
+svg.fig .em{animation:wig 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes wig{50%{transform:rotate(14deg) scale(1.1)}}
+svg.fig .spn{animation:rot 1.6s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes rot{to{transform:rotate(360deg)}}
+svg.fig .au{animation:up 1s ease-in-out infinite}svg.fig .ad{animation:dn 1s ease-in-out infinite}
+@keyframes up{50%{transform:translateY(-6px)}}@keyframes dn{50%{transform:translateY(6px)}}
+
+@media(max-width:820px){
+  .hero{grid-template-columns:1fr}.hero .sig{order:-1}
+  .lab-g{grid-template-columns:1fr}.pair{grid-template-columns:1fr}.sum3{grid-template-columns:1fr}
+  .prog .track{width:70px}.logo small{display:none}.card{padding:16px}.fb .cmp{grid-template-columns:1fr}
+}
+@media(max-width:560px){.logo span{display:none}}
+@media(max-width:480px){.opts.four{grid-template-columns:1fr}main{padding:16px 14px 60px}.bar-in{padding:8px 14px;gap:8px}.tb{padding:5px 9px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+@media print{.bar,#ov,#modal,.cf{display:none!important}}
+
+/* محطات الاستجابة الحركية */
+.zones{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.zn{padding:4px 12px;border-radius:99px;background:var(--card);border:2px solid var(--line);font-size:.82rem;font-weight:700}
+.zn.on{background:var(--brand);color:#fff;border-color:var(--brand)}.zn.done{background:#dff3a0;border-color:#c8dc28;color:#2c3a00}
+.steps{display:flex;gap:6px;direction:ltr;justify-content:center;margin:8px 0 10px;flex-wrap:wrap}
+.stp{padding:5px 16px;border-radius:99px;background:var(--soft);font:800 .85rem Arial,sans-serif;letter-spacing:.5px;opacity:.6;transition:.3s}
+.stp.on{background:var(--brand);color:#fff;opacity:1;transform:scale(1.1)}.stp.done{background:#dff3a0;color:#2c3a00;opacity:1}
+.ring{width:90px;height:90px;margin:8px auto;position:relative}
+.ring svg{transform:rotate(-90deg)}.ring circle{fill:none;stroke-width:10}.ring .bg{stroke:var(--soft)}
+.ring .fg{stroke:var(--brand);stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:0;animation:ringgo linear forwards}
+@keyframes ringgo{to{stroke-dashoffset:264}}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.7rem}
+.bigemoji{font-size:3rem;line-height:1;display:grid;place-items:center;height:90px}
+.banner{text-align:center;font-size:clamp(1.1rem,3vw,1.5rem);font-weight:700;margin:8px 0;padding:10px;border-radius:16px;background:var(--wait-bg);border:2px solid var(--wait)}
+.mini{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.mini .it{display:flex;flex-direction:column;align-items:center;font-size:.85rem;text-align:center;max-width:170px;gap:2px}
+.optsl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.opt{display:flex;gap:10px;align-items:center;background:#fff;border:3px solid var(--line);border-radius:16px;padding:8px 12px;box-shadow:0 4px 0 var(--line);font-size:1.05rem;font-weight:700}
+.opt .L{min-width:36px;height:36px;border-radius:11px;background:var(--brand);color:#fff;display:grid;place-items:center;font-family:Arial,sans-serif;font-weight:900}
+.opt.right{border-color:var(--go);background:var(--go-bg)}.opt.right .L{background:var(--go)}
+.scale{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.sc{background:#fff;border:3px solid var(--line);border-radius:16px;padding:6px;width:108px;text-align:center;font-size:.78rem;font-weight:700;box-shadow:0 4px 0 var(--line);cursor:pointer}
+.sc.pick{border-color:var(--brand);background:#eaf0ff;transform:translateY(-4px)}
+.cmp{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px;font-size:1.1rem}
+/* إشارة المرور: الطريق والتعريف */
+.road{position:relative;height:92px;margin:2px 0 14px;background:#4a5068;border-radius:44px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18),0 6px 0 #2f3446;overflow:hidden}
+.road:before{content:"";position:absolute;inset:50% 0 auto 0;height:5px;transform:translateY(-50%);background:repeating-linear-gradient(90deg,#fff 0 26px,transparent 26px 52px);animation:dash 1.4s linear infinite;opacity:.9}
+@keyframes dash{to{background-position:-52px 0}}
+.stn{position:absolute;top:38%;transform:translate(50%,-50%);z-index:2}
+.stn .dot{width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;border:4px solid #fff;box-shadow:0 4px 0 rgba(0,0,0,.25);font-size:.7rem;line-height:1.1;text-align:center;font-weight:800;align-content:center}
+.stn.on .dot{background:#c8dc28;transform:scale(1.12)}.stn.done .dot{background:var(--go);color:#fff}
+.car{position:absolute;top:80%;font-size:26px;z-index:3;transform:translate(50%,-50%) scaleX(-1);transition:right .8s cubic-bezier(.5,.1,.2,1);filter:drop-shadow(0 4px 0 rgba(0,0,0,.25))}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+.lg{border-radius:20px;padding:12px;text-align:center;border:3px solid;display:flex;flex-direction:column;align-items:center;gap:6px}
+.lg.g{background:var(--go-bg);border-color:var(--go)}.lg.y{background:var(--wait-bg);border-color:var(--wait)}.lg.r{background:var(--stop-bg);border-color:var(--stop)}
+.lg span{font-size:.88rem;color:var(--ink2)}
+@media(max-width:640px){.legend{gap:6px}.optsl{grid-template-columns:1fr}.road{height:78px}.stn .dot{width:46px;height:46px}}
+
+/* ===== حركات تفاعلية إضافية ===== */
+.flip{position:relative;display:inline-block}
+.flip svg{position:absolute;inset:0;width:100%;height:100%}
+.flip svg:first-child{animation:flipA 2.4s infinite steps(1)}
+.flip svg:last-child{animation:flipB 2.4s infinite steps(1)}
+@keyframes flipA{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+@keyframes flipB{0%,50%{opacity:0}50.01%,100%{opacity:1}}
+.track{position:relative;overflow:visible}
+.pcar{position:absolute;top:-9px;right:0;font-size:16px;font-style:normal;transition:right .6s cubic-bezier(.3,1.4,.5,1);transform:scaleX(-1)}
+.outv.anim .ln{opacity:0;animation:lnin .3s forwards}
+@keyframes lnin{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.trk{margin-top:10px;background:#0f1729;border-radius:12px;padding:30px 12px 10px;position:relative;overflow-x:auto}
+.nds{display:flex;gap:8px;position:relative}
+.nd{min-width:34px;text-align:center;padding:5px 8px;border-radius:8px;background:#1d2a4a;color:#9fb3e8;font:600 14px 'JetBrains Mono',monospace;transition:.25s}
+.nd.on{background:#12a150;color:#fff;transform:translateY(-3px) scale(1.12)}
+.nd.past{background:#1b4d3a;color:#bff0d3}
+.nd.stop{background:#3a1d24;color:#ff9aa0;border:1px dashed #d8343a}
+.nd.stop.on{background:#d8343a;color:#fff}
+.tcar{position:absolute;top:2px;left:0;font-style:normal;font-size:22px;transition:transform .4s ease}
+.tcap{display:flex;gap:10px;align-items:center;margin-top:8px;color:#cfe0ff;font-size:13px;direction:rtl}
+.tcap em{font:600 13px 'JetBrains Mono',monospace;color:#ffd166}
+.rp{margin-inline-start:auto;background:#2750d8;color:#fff;border:0;border-radius:8px;padding:4px 10px;cursor:pointer;font:inherit}
+.lampbox{flex:none;animation:glow 1.4s ease-in-out infinite alternate}
+@keyframes glow{from{filter:drop-shadow(0 0 2px #fff6)}to{filter:drop-shadow(0 0 12px #ffd166)}}
+.rv{display:flex;gap:12px;align-items:flex-start}
+.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.bounce{animation:bounce .5s}
+@keyframes bounce{0%{transform:scale(.94);opacity:.4}60%{transform:scale(1.03)}100%{transform:none;opacity:1}}
+.pill.fire{background:#ffe9d1;color:#c4510a;animation:bounce .5s}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:#12203f;color:#fff;padding:12px 20px;border-radius:30px;font-weight:700;box-shadow:0 8px 30px #0006;transition:transform .4s cubic-bezier(.3,1.4,.5,1);z-index:99;max-width:90vw;text-align:center}
+#toast.on{transform:translate(-50%,0)}
+.qk{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.qb{background:#e8eeff;color:#2750d8;border:1px solid #c9d6ff;border-radius:9px;padding:5px 11px;font:700 14px 'JetBrains Mono',monospace;cursor:pointer;transition:.15s}
+.qb:hover{background:#2750d8;color:#fff;transform:translateY(-2px)}
+
+.goal-h span{display:inline-block;background:#e8eeff;color:#2750d8;border-radius:20px;padding:3px 14px;font-weight:700;font-size:.9rem}
+.goals{display:grid;gap:12px;margin-top:14px}
+.goals>div{display:flex;gap:14px;align-items:center;background:#fff;border:2px solid #dbe4ff;border-radius:16px;padding:14px 16px;font-size:1.2rem;font-weight:700;animation:bounce .5s both}
+.goals>div:nth-child(2){animation-delay:.15s}.goals>div:nth-child(3){animation-delay:.3s}
+.goals>div>b:first-child{flex:none;width:44px;height:44px;border-radius:50%;background:#2750d8;color:#fff;display:grid;place-items:center;font-size:1.3rem}
+.goals.g3{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.goals.g3 i{font-style:normal;font-weight:700;border-radius:14px;padding:12px;text-align:center}
+.goals.g3 .r{background:#fde8e9;color:#a3191f}.goals.g3 .y{background:#fff2d1;color:#8a5a00}.goals.g3 .g{background:#dcf5e6;color:#0b6a38}
+
+.cmp{display:grid;gap:12px;margin-top:12px}
+.cmp>div{border-radius:16px;padding:10px 14px;border:2px solid}
+.cmp .bad{background:#fff1f1;border-color:#f3b5b8}.cmp .good{background:#eefaf2;border-color:#a8e0bf}
+.cmp h4{margin:0 0 6px;font-size:1rem}.cmp .bad h4{color:#a3191f}.cmp .good h4{color:#0b6a38}
+.cmp pre{direction:ltr;text-align:left;margin:0;background:#0f1729;color:#e6edff;border-radius:10px;padding:10px 12px;font:600 .85rem/1.5 'JetBrains Mono',monospace;white-space:pre;overflow-x:auto}
+
+</style>
+</head>
+<body>
+<div id="app"></div><div id="ov"></div><div id="modal"></div><div id="toast"></div>
+<script>
+/* مفسّر بايثون مصغّر: for و range و print فقط (مع متغيرات وعمليات حسابية ونصوص) */
+(function (root) {
+  class PyErr extends Error {
+    constructor(kind, msg, line) { super(msg); this.kind = kind; this.line = line; }
+  }
+  const BANNED = new Set(['while','if','elif','else','def','break','continue','import','from','return','class','try','except','with','lambda','input','global','del','assert','raise','yield']);
+  const IDS = /[\p{L}_]/u, IDC = /[\p{L}\p{N}_]/u;
+
+  function stripComment(s) {
+    let q = null;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (q) { if (c === '\\') i++; else if (c === q) q = null; }
+      else if (c === '"' || c === "'") q = c;
+      else if (c === '#') return s.slice(0, i);
+    }
+    return s;
+  }
+
+  function readStr(s, start, line) {
+    const q = s[start]; let i = start + 1, raw = '';
+    while (i < s.length && s[i] !== q) {
+      if (s[i] === '\\' && i + 1 < s.length) { raw += s[i] + s[i + 1]; i += 2; }
+      else raw += s[i++];
+    }
+    if (i >= s.length) throw new PyErr('SyntaxError', 'unterminated string literal', line);
+    return { raw, end: i + 1 };
+  }
+  function unesc(raw) {
+    return raw.replace(/\\(.)/g, (m, c) => c === 'n' ? '\n' : c === 't' ? '\t' : c === '\\' ? '\\' : c === '"' ? '"' : c === "'" ? "'" : m);
+  }
+
+  function tokenize(s, line) {
+    const t = []; let i = 0;
+    while (i < s.length) {
+      const c = s[i];
+      if (c === ' ') { i++; continue; }
+      if (/\d/.test(c)) {
+        let j = i; while (j < s.length && /\d/.test(s[j])) j++;
+        if (s[j] === '.') throw new PyErr('Unsupported', 'الأعداد العشرية خارج حدود هذا الدرس', line);
+        if (j < s.length && IDS.test(s[j])) throw new PyErr('SyntaxError', 'invalid decimal literal', line);
+        t.push({ t: 'num', v: parseInt(s.slice(i, j), 10) }); i = j; continue;
+      }
+      if (IDS.test(c)) {
+        let j = i; while (j < s.length && IDC.test(s[j])) j++;
+        const w = s.slice(i, j);
+        if ((w === 'f' || w === 'F') && (s[j] === '"' || s[j] === "'")) {
+          const r = readStr(s, j, line); t.push({ t: 'fstr', raw: r.raw }); i = r.end; continue;
+        }
+        t.push({ t: 'name', v: w }); i = j; continue;
+      }
+      if (c === '"' || c === "'") { const r = readStr(s, i, line); t.push({ t: 'str', v: unesc(r.raw) }); i = r.end; continue; }
+      const two = s.slice(i, i + 2);
+      if (two === '//' || two === '**') { t.push({ t: 'op', v: two }); i += 2; continue; }
+      if ('+-*%(),='.includes(c)) { t.push({ t: 'op', v: c }); i++; continue; }
+      if (c === '/') throw new PyErr('Unsupported', 'القسمة العشرية / خارج حدود هذا الدرس', line);
+      throw new PyErr('SyntaxError', 'invalid character ' + c, line);
+    }
+    return t;
+  }
+
+  class Parser {
+    constructor(tokens, line) { this.t = tokens; this.p = 0; this.line = line; }
+    peek() { return this.t[this.p]; }
+    isOp(v) { const k = this.t[this.p]; return k && k.t === 'op' && k.v === v; }
+    err(m) { return new PyErr('SyntaxError', m || 'invalid syntax', this.line); }
+    expect(v) { if (!this.isOp(v)) throw this.err("'" + v + "' expected"); this.p++; }
+    done() { return this.p >= this.t.length; }
+    expr() {
+      let l = this.mul();
+      while (this.isOp('+') || this.isOp('-')) { const op = this.t[this.p++].v; l = { k: 'bin', op, l, r: this.mul() }; }
+      return l;
+    }
+    mul() {
+      let l = this.unary();
+      while (this.isOp('*') || this.isOp('//') || this.isOp('%')) { const op = this.t[this.p++].v; l = { k: 'bin', op, l, r: this.unary() }; }
+      return l;
+    }
+    unary() {
+      if (this.isOp('-') || this.isOp('+')) { const op = this.t[this.p++].v; return { k: 'un', op, e: this.unary() }; }
+      const b = this.atom();
+      if (this.isOp('**')) { this.p++; return { k: 'bin', op: '**', l: b, r: this.unary() }; }
+      return b;
+    }
+    atom() {
+      const tk = this.t[this.p++];
+      if (!tk) throw this.err('unexpected end of line');
+      if (tk.t === 'num') return { k: 'num', v: tk.v };
+      if (tk.t === 'str') return { k: 'str', v: tk.v };
+      if (tk.t === 'fstr') return this.fstr(tk.raw);
+      if (tk.t === 'name') {
+        if (this.isOp('(')) {
+          this.p++; const args = [];
+          while (!this.isOp(')')) {
+            args.push(this.expr());
+            if (this.isOp(',')) this.p++; else break;
+          }
+          this.expect(')');
+          return { k: 'call', name: tk.v, args };
+        }
+        return { k: 'var', name: tk.v };
+      }
+      if (tk.t === 'op' && tk.v === '(') { const e = this.expr(); this.expect(')'); return e; }
+      throw this.err();
+    }
+    fstr(raw) {
+      const parts = []; let buf = '', i = 0;
+      while (i < raw.length) {
+        const c = raw[i];
+        if (c === '{' && raw[i + 1] === '{') { buf += '{'; i += 2; }
+        else if (c === '}' && raw[i + 1] === '}') { buf += '}'; i += 2; }
+        else if (c === '{') {
+          const j = raw.indexOf('}', i);
+          if (j < 0) throw this.err("f-string: expecting '}'");
+          const inner = raw.slice(i + 1, j);
+          if (/[:!]/.test(inner.replace(/"[^"]*"|'[^']*'/g, ''))) throw new PyErr('Unsupported', 'تنسيق f-string المتقدم خارج حدود هذا الدرس', this.line);
+          if (buf) { parts.push(unesc(buf)); buf = ''; }
+          const sub = new Parser(tokenize(inner, this.line), this.line);
+          const e = sub.expr(); if (!sub.done()) throw this.err();
+          parts.push(e); i = j + 1;
+        } else { buf += c; i++; }
+      }
+      if (buf) parts.push(unesc(buf));
+      return { k: 'fstr', parts };
+    }
+    printArgs() {
+      const args = [], kw = {};
+      while (!this.done()) {
+        const a = this.peek(), b = this.t[this.p + 1];
+        if (a.t === 'name' && b && b.t === 'op' && b.v === '=') {
+          this.p += 2;
+          if (a.v !== 'sep' && a.v !== 'end') throw new PyErr('TypeError', "'" + a.v + "' is an invalid keyword argument for print()", this.line);
+          kw[a.v] = this.expr();
+        } else args.push(this.expr());
+        if (this.isOp(',')) this.p++; else break;
+      }
+      if (!this.done()) throw this.err();
+      return { args, kw };
+    }
+  }
+
+  function parseProgram(src) {
+    const raw = src.replace(/\r/g, '').split('\n');
+    const lines = [];
+    raw.forEach((l, i) => {
+      const s = stripComment(l.replace(/\t/g, '    '));
+      if (!s.trim()) return;
+      lines.push({ no: i + 1, indent: s.match(/^ */)[0].length, text: s.trim() });
+    });
+    let pos = 0; const levels = [0];
+
+    function stmt(L) {
+      const text = L.text, first = (text.match(/^[\p{L}_][\p{L}\p{N}_]*/u) || [''])[0];
+      if (BANNED.has(first)) {
+        throw new PyErr('Unsupported', 'الأمر «' + first + '» خارج حدود هذا الدرس: نستخدم for و range فقط', L.no);
+      }
+      if (first === 'for') {
+        const m = text.match(/^for\s+([\p{L}_][\p{L}\p{N}_]*)\s+in\s+(.*?)\s*(:?)$/u);
+        if (!m) throw new PyErr('SyntaxError', 'invalid syntax', L.no);
+        if (!m[3]) throw new PyErr('SyntaxError', "expected ':'", L.no);
+        const rm = m[2].match(/^range\s*\((.*)\)$/s);
+        if (!rm) throw new PyErr('Unsupported', 'في هذا الدرس نكتب for مع range فقط', L.no);
+        const ps = new Parser(tokenize(rm[1], L.no), L.no), args = [];
+        while (!ps.done()) { args.push(ps.expr()); if (ps.isOp(',')) ps.p++; else break; }
+        if (!ps.done()) throw ps.err();
+        return { type: 'for', v: m[1], args, line: L.no, body: null };
+      }
+      if (first === 'print') {
+        const m = text.match(/^print\s*\((.*)\)$/s);
+        if (!m) throw new PyErr('SyntaxError', "'(' was never closed", L.no);
+        const ps = new Parser(tokenize(m[1], L.no), L.no);
+        const r = ps.printArgs();
+        return { type: 'print', args: r.args, kw: r.kw, line: L.no };
+      }
+      if (first === 'pass' && text === 'pass') return { type: 'pass', line: L.no };
+      const am = text.match(/^([\p{L}_][\p{L}\p{N}_]*)\s*(\+=|-=|\*=|\/\/=|%=|=)(?!=)\s*(.*)$/u);
+      if (am) {
+        if (!am[3]) throw new PyErr('SyntaxError', 'invalid syntax', L.no);
+        const ps = new Parser(tokenize(am[3], L.no), L.no), e = ps.expr();
+        if (!ps.done()) throw ps.err();
+        return { type: 'assign', name: am[1], op: am[2], e, line: L.no };
+      }
+      throw new PyErr('SyntaxError', 'invalid syntax', L.no);
+    }
+
+    function block(ind) {
+      const out = [];
+      while (pos < lines.length) {
+        const L = lines[pos];
+        if (L.indent < ind) {
+          if (!levels.includes(L.indent)) throw new PyErr('IndentationError', 'unindent does not match any outer indentation level', L.no);
+          break;
+        }
+        if (L.indent > ind) throw new PyErr('IndentationError', 'unexpected indent', L.no);
+        pos++;
+        const s = stmt(L);
+        if (s.type === 'for') {
+          const nx = lines[pos];
+          if (!nx || nx.indent <= ind) throw new PyErr('IndentationError', 'expected an indented block', nx ? nx.no : L.no);
+          levels.push(nx.indent);
+          s.body = block(nx.indent);
+          levels.pop();
+        }
+        out.push(s);
+      }
+      return out;
+    }
+    if (lines.length && lines[0].indent > 0) throw new PyErr('IndentationError', 'unexpected indent', lines[0].no);
+    const prog = block(0);
+    if (pos < lines.length) throw new PyErr('IndentationError', 'unexpected indent', lines[pos].no);
+    return prog;
+  }
+
+  const tname = v => typeof v === 'number' ? 'int' : 'str';
+  const pyStr = v => String(v);
+
+  function ev(n, env, ctx, line) {
+    switch (n.k) {
+      case 'num': case 'str': case 'lit': return n.v;
+      case 'fstr': return n.parts.map(p => typeof p === 'string' ? p : pyStr(ev(p, env, ctx, line))).join('');
+      case 'var':
+        if (!(n.name in env)) throw new PyErr('NameError', "name '" + n.name + "' is not defined", line);
+        return env[n.name];
+      case 'un': {
+        const v = ev(n.e, env, ctx, line);
+        if (typeof v !== 'number') throw new PyErr('TypeError', "bad operand type for unary " + n.op + ": 'str'", line);
+        return n.op === '-' ? -v : v;
+      }
+      case 'call': {
+        const a = n.args.map(x => ev(x, env, ctx, line));
+        if (n.name === 'str' && a.length === 1) return pyStr(a[0]);
+        if (n.name === 'len' && a.length === 1 && typeof a[0] === 'string') return a[0].length;
+        if (n.name === 'abs' && a.length === 1 && typeof a[0] === 'number') return Math.abs(a[0]);
+        if (n.name === 'int' && a.length === 1) {
+          if (typeof a[0] === 'number') return a[0];
+          if (/^\s*-?\d+\s*$/.test(a[0])) return parseInt(a[0], 10);
+          throw new PyErr('ValueError', "invalid literal for int(): '" + a[0] + "'", line);
+        }
+        if (n.name === 'range') throw new PyErr('Unsupported', 'نستخدم range داخل سطر for فقط', line);
+        throw new PyErr('NameError', "name '" + n.name + "' is not defined", line);
+      }
+      case 'bin': {
+        const l = ev(n.l, env, ctx, line), r = ev(n.r, env, ctx, line), op = n.op;
+        const ln = typeof l === 'number', rn = typeof r === 'number';
+        if (op === '+') {
+          if (ln && rn) return l + r;
+          if (!ln && !rn) return l + r;
+          throw new PyErr('TypeError', ln ? "unsupported operand type(s) for +: 'int' and 'str'" : 'can only concatenate str (not "int") to str', line);
+        }
+        if (op === '*') {
+          if (ln && rn) return l * r;
+          if (ln !== rn) { const s = ln ? r : l, k = ln ? l : r; return k > 0 ? (s.length * k > 2000 ? (() => { throw new PyErr('RuntimeError', 'too long', line); })() : s.repeat(k)) : ''; }
+          throw new PyErr('TypeError', "can't multiply sequence by non-int of type 'str'", line);
+        }
+        if (!ln || !rn) throw new PyErr('TypeError', "unsupported operand type(s) for " + op + ": '" + tname(l) + "' and '" + tname(r) + "'", line);
+        if (op === '-') return l - r;
+        if (op === '//') { if (r === 0) throw new PyErr('ZeroDivisionError', 'integer division or modulo by zero', line); return Math.floor(l / r); }
+        if (op === '%') { if (r === 0) throw new PyErr('ZeroDivisionError', 'integer modulo by zero', line); return ((l % r) + r) % r; }
+        if (op === '**') {
+          if (r < 0) throw new PyErr('Unsupported', 'الأسس السالبة خارج حدود هذا الدرس', line);
+          const v = Math.pow(l, r); if (!Number.isSafeInteger(v)) throw new PyErr('RuntimeError', 'number too large', line); return v;
+        }
+      }
+    }
+    throw new PyErr('SyntaxError', 'invalid syntax', line);
+  }
+
+  function exec(stmts, env, ctx, depth) {
+    for (const s of stmts) {
+      if (++ctx.steps > ctx.max) throw new PyErr('RuntimeError', 'too many steps', s.line);
+      if (s.type === 'print') {
+        const vals = s.args.map(a => pyStr(ev(a, env, ctx, s.line)));
+        const sep = s.kw.sep ? pyStr(ev(s.kw.sep, env, ctx, s.line)) : ' ';
+        const end = s.kw.end ? pyStr(ev(s.kw.end, env, ctx, s.line)) : '\n';
+        ctx.out += vals.join(sep) + end;
+        if (ctx.out.length > 20000) throw new PyErr('RuntimeError', 'too much output', s.line);
+      } else if (s.type === 'assign') {
+        let v = ev(s.e, env, ctx, s.line);
+        if (s.op !== '=') {
+          if (!(s.name in env)) throw new PyErr('NameError', "name '" + s.name + "' is not defined", s.line);
+          const cur = env[s.name], op = s.op.slice(0, -1);
+          v = ev({ k: 'bin', op, l: { k: 'lit', v: cur }, r: { k: 'lit', v } }, env, ctx, s.line);
+        }
+        env[s.name] = v;
+      } else if (s.type === 'for') {
+        const a = s.args.map(e => ev(e, env, ctx, s.line));
+        if (a.length < 1 || a.length > 3) throw new PyErr('TypeError', a.length < 1 ? 'range expected at least 1 argument, got 0' : 'range expected at most 3 arguments, got ' + a.length, s.line);
+        a.forEach(x => { if (typeof x !== 'number') throw new PyErr('TypeError', "'str' object cannot be interpreted as an integer", s.line); });
+        const start = a.length === 1 ? 0 : a[0], stop = a.length === 1 ? a[0] : a[1], step = a.length === 3 ? a[2] : 1;
+        if (step === 0) throw new PyErr('ValueError', 'range() arg 3 must not be zero', s.line);
+        const rec = depth === 0 && ctx.trace === null;
+        if (rec) { ctx.trace = []; ctx.traceVar = s.v; ctx.traceRange = [start, stop, step]; }
+        for (let v = start; step > 0 ? v < stop : v > stop; v += step) {
+          if (rec && ctx.trace.length < 40) ctx.trace.push(v); else if (rec) ctx.traceMore = true;
+          env[s.v] = v;
+          if (++ctx.steps > ctx.max) throw new PyErr('RuntimeError', 'too many steps', s.line);
+          exec(s.body, env, ctx, depth + 1);
+        }
+      }
+    }
+  }
+
+  function collect(stmts, out) {
+    for (const s of stmts) if (s.type === 'for') { out.push({ argc: s.args.length, v: s.v }); collect(s.body, out); }
+    return out;
+  }
+
+  function runPy(src) {
+    const res = { ok: false, lines: [], err: null, trace: null, traceVar: null, traceRange: null, traceMore: false, fors: [] };
+    let prog;
+    try {
+      prog = parseProgram(String(src));
+      res.fors = collect(prog, []);
+      const ctx = { out: '', steps: 0, max: 20000, trace: null, traceVar: null, traceMore: false, traceRange: null };
+      try { exec(prog, Object.create(null), ctx, 0); }
+      finally {
+        res.lines = normLines(ctx.out); res.trace = ctx.trace; res.traceVar = ctx.traceVar; res.traceMore = ctx.traceMore; res.traceRange = ctx.traceRange;
+      }
+      res.ok = true;
+    } catch (e) {
+      if (e instanceof PyErr) res.err = { kind: e.kind, msg: e.message, line: e.line };
+      else res.err = { kind: 'InternalError', msg: String(e && e.message || e), line: 0 };
+    }
+    return res;
+  }
+  function normLines(out) {
+    const l = out.split('\n').map(x => x.replace(/\s+$/, ''));
+    while (l.length && l[l.length - 1] === '') l.pop();
+    return l;
+  }
+
+  function friendly(e) {
+    const k = e.kind, m = e.msg;
+    if (k === 'IndentationError') {
+      if (/expected an indented block/.test(m)) return 'بعد سطر for يجب أن يبدأ السطر التالي بمسافة بادئة (٤ مسافات) ليصبح داخل الحلقة.';
+      if (/unexpected indent/.test(m)) return 'هذا السطر يبدأ بمسافة زائدة بلا داعٍ. احذفي المسافات الزائدة أو اجعليه داخل حلقة.';
+      return 'مسافة هذا السطر لا تطابق أي مستوى سابق. اجعليها مثل بقية أسطر الحلقة (٤ مسافات) أو بلا مسافة لتخرجي من الحلقة.';
+    }
+    if (k === 'SyntaxError') {
+      if (/expected ':'/.test(m)) return 'ينقص النقطتان ( : ) في نهاية سطر for.';
+      if (/unterminated string/.test(m)) return 'علامة الاقتباس غير مغلقة: أغلقي النص بعلامة اقتباس مطابقة.';
+      if (/never closed|'\)' expected/.test(m)) return 'قوس غير مغلق: راجعي أقواس print أو range.';
+      return 'صيغة السطر غير صحيحة. راجعي الأقواس وعلامات الاقتباس والفواصل.';
+    }
+    if (k === 'NameError') { const v = (m.match(/'(.+?)'/) || [])[1]; return 'الاسم «' + v + '» غير معرَّف. تأكدي من كتابته كما في الحلقة أو عرّفيه قبل استخدامه. وإن كان نصًّا فضعيه بين علامتي اقتباس.'; }
+    if (k === 'TypeError') {
+      if (/concatenate|unsupported operand type\(s\) for \+/.test(m)) return 'لا يمكن جمع نص مع رقم بعلامة +. افصلي بينهما بفاصلة داخل print، مثل: print("طالبة", i).';
+      if (/range expected at least/.test(m)) return 'range تحتاج إلى قيمة واحدة على الأقل داخل القوسين.';
+      if (/range expected at most/.test(m)) return 'range تقبل حتى ثلاث قيم فقط: البداية، النهاية، الخطوة.';
+      if (/interpreted as an integer/.test(m)) return 'قيم range يجب أن تكون أعدادًا صحيحة، وليست نصوصًا.';
+      return 'نوع القيمة غير مناسب لهذه العملية.';
+    }
+    if (k === 'ValueError') return 'الخطوة في range لا يمكن أن تكون صفرًا.';
+    if (k === 'ZeroDivisionError') return 'لا يمكن القسمة على صفر.';
+    if (k === 'RuntimeError') return 'الكود طلب عددًا كبيرًا جدًا من الخطوات أو المخرجات. راجعي قيم range.';
+    if (k === 'Unsupported') return m;
+    return 'حدث خطأ غير متوقع. راجعي الكود.';
+  }
+
+  const api = { runPy, friendly, normLines };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.PY = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* بيانات الدرس: حلقة for ودالة range — كل الأكواد تقتصر على for و range */
+(function (root) {
+const N = s => s.trim().split(/\s+/);
+const rep = (s, n) => Array(n).fill(s);
+const L = (task, starter, expect, solution, hint, why, o) => Object.assign({ task, starter, expect, solution, hint, why }, o || {});
+const IND = 'ابدئي السطر الثاني بأربع مسافات (أو اضغطي زر Tab).';
+
+/* ---------------- قسم الشرح ---------------- */
+const lesson = [
+ { id:'learn1', kind:'lesson', num:'1', en:'WHY LOOPS', ar:'لماذا نحتاج الحلقة؟', tag:'مشكلة المبرمج وتعريف الحلقة', color:'#2750d8',
+   items:[
+    { title:'نشاط افتتاحي: مشكلة المبرمج', html:'<p>مبرمج يريد أن تضيء اللمبة (أو تدور السلحفاة) عدة مرات، فيكتب الأمر نفسه مرة بعد مرة!</p><p class="ask">١ ماذا تعرفين عن البايثون؟ &nbsp; ٢ اقترحي حلًّا يختصر الوقت والجهد.</p>',
+      code:'led.on()\nled.on()\nled.on()\nled.on()\n...', note:'لو أردناها ١٠٠ مرة، كم سطرًا نكتب؟',
+      lab:L('اطبعي كلمة «Hi» خمس مرات. فكّري كيف تختصرين خمسة أسطر في سطرين فقط.','# اكتبي الحلقة هنا\n',rep('Hi',5),'for i in range(5):\n    print("Hi")','حلقة for مع range(5) تكرر الأمر خمس مرات.','سطران بدل خمسة: وهذا هو توفير الوقت والجهد الذي تحققه الحلقة.',{needArgs:1}) },
+    { title:'ما الحلقة؟', html:'<p><b>الحلقة (Loop)</b> بنية تحكم تكرر مجموعة من الأوامر عدة مرات، وتوفر الوقت والجهد.</p>',
+      code:'for i in range(5):\n    print("Hi")', output:rep('Hi',5), note:'بدون حلقة: ٥ أسطر · بحلقة: سطران فقط',
+      lab:L('عدّلي الحلقة لتطبع «Hi» ثماني مرات بتغيير رقم واحد فقط.','for i in range(5):\n    print("Hi")',rep('Hi',8),'for i in range(8):\n    print("Hi")','الرقم داخل range هو عدد التكرارات.','غيّرنا الرقم 5 إلى 8 فتكرر الأمر 8 مرات دون كتابة سطور جديدة.',{needArgs:1}) }
+   ],
+   challenge:L('اطبعي «أنا أتعلم الحلقات» عشر مرات.','',rep('أنا أتعلم الحلقات',10),'for i in range(10):\n    print("أنا أتعلم الحلقات")','استخدمي range(10).','عشر مرات بسطرين فقط.') },
+
+ { id:'learn2', kind:'lesson', num:'2', en:'FOR & INDENT', ar:'حلقة for والمسافة البادئة', tag:'الصيغة العامة وأهمية المسافة', color:'#0e8f6b',
+   items:[
+    { title:'حلقة for', html:'<ul><li>عدد التكرارات يُحدَّد بقيم دالة النطاق <b>range()</b>.</li><li>يجب أن تُسبق الأوامر المتكررة بمسافة بادئة.</li><li>تُستخدم عندما يكون عدد التكرار محددًا سابقًا.</li></ul>',
+      code:'for loop_variable in range():\n    statements', 
+      lab:L('اكتبي حلقة تطبع «مرحبا» ثلاث مرات.','',rep('مرحبا',3),'for i in range(3):\n    print("مرحبا")','for i in range(3): ثم سطر print بمسافة بادئة.','عدد التكرارات 3 فاكتفينا بـ range(3).') },
+    { title:'المسافة البادئة في الحلقات', html:'<p>المسافة البادئة تخبر بايثون أي الأوامر تتكرر داخل الحلقة. إذا لم تتركي مسافة بادئة ستتلقين رسالة خطأ.</p>',
+      code:'for i in range(3):\n    print(i)', output:['0','1','2'], note:'صحيح ✔ — بدون المسافة البادئة تظهر رسالة خطأ ✖',
+      lab:L('هذا الكود ينقصه مسافة بادئة، فيظهر خطأ. أصلحيه ليطبع 0 ثم 1 ثم 2.','for i in range(3):\nprint(i)',N('0 1 2'),'for i in range(3):\n    print(i)',IND,'السطر داخل الحلقة يحتاج مسافة بادئة، فبدونها لا يعرف بايثون أنه جزء من الحلقة.') }
+   ],
+   challenge:L('اطبعي «أ» ثم «ب» في كل تكرار، وكرري ذلك مرتين: أ ثم ب ثم أ ثم ب.','',['أ','ب','أ','ب'],'for i in range(2):\n    print("أ")\n    print("ب")','ضعي الأمرين print داخل الحلقة بالمسافة نفسها.','كلا الأمرين بمسافة بادئة واحدة، فيتكرران معًا.') },
+
+ { id:'learn3', kind:'lesson', num:'3', en:'RANGE', ar:'دالة النطاق range()', tag:'البداية والخطوة والعدّ العكسي', color:'#c9710a',
+   items:[
+    { title:'دالة النطاق range()', html:'<ul><li>يبدأ العدّاد من <b>0</b>.</li><li>يزيد بمقدار <b>1</b>.</li><li>ينتهي <b>قبل</b> الرقم المحدد.</li></ul><p><b>العدّاد (counter):</b> المتغير الذي يحسب عدد التكرارات.</p>',
+      code:'for i in range(5):\n    print(i)', output:N('0 1 2 3 4'),
+      lab:L('اطبعي الأعداد من 0 إلى 6 باستخدام قيمة واحدة فقط داخل range.','for i in range():\n    print(i)',N('0 1 2 3 4 5 6'),'for i in range(7):\n    print(i)','الرقم الأخير غير مدرج، فاكتبي 7.','range(7) تعدّ من 0 وتنتهي قبل 7 أي عند 6.',{needArgs:1}) },
+    { title:'تحديد البداية', html:'<p>نضيف قيمة قبل النهاية لنحدد بداية العدّ.</p>', code:'for i in range(2, 5):\n    print(i)', output:N('2 3 4'), note:'يبدأ من 2 وينتهي عند 4، والقيمة 5 غير مدرجة',
+      lab:L('اطبعي الأعداد 3 ثم 4 ثم 5 ثم 6.','',N('3 4 5 6'),'for i in range(3, 7):\n    print(i)','البداية 3 والنهاية 7 لأنها غير مدرجة.','range(3, 7) تبدأ من 3 وتتوقف قبل 7.',{needArgs:2}) },
+    { title:'تحديد الخطوة', html:'<p>القيمة الثالثة تحدد مقدار الزيادة (الخطوة).</p>', code:'for i in range(1, 5, 2):\n    print(i)', output:N('1 3'),
+      lab:L('اطبعي الأعداد الفردية 1 ثم 3 ثم 5 ثم 7.','',N('1 3 5 7'),'for i in range(1, 8, 2):\n    print(i)','ابدئي من 1 بخطوة 2 وانتهي قبل 8.','الخطوة 2 تقفز عددًا في كل مرة.',{needArgs:3}) },
+    { title:'خطوة سالبة', html:'<p>الخطوة السالبة تجعل العدّ عكسيًا. يجب أن تكون البداية أكبر من النهاية.</p>', code:'for i in range(10, 5, -2):\n    print(i)', output:N('10 8 6'),
+      lab:L('اطبعي عدًّا تنازليًا: 5 ثم 4 ثم 3 ثم 2 ثم 1.','',N('5 4 3 2 1'),'for i in range(5, 0, -1):\n    print(i)','الخطوة -1 والنهاية 0 حتى يظهر 1.','النهاية 0 غير مدرجة فيتوقف العدّ عند 1.',{needArgs:3}) }
+   ],
+   challenge:L('اطبعي مضاعفات الرقم 5 من 5 إلى 50.','',N('5 10 15 20 25 30 35 40 45 50'),'for i in range(5, 51, 5):\n    print(i)','البداية 5 والخطوة 5 والنهاية 51.','البداية والخطوة 5، والنهاية 51 حتى يدخل 50.') },
+
+ { id:'predict', kind:'lesson', num:'4', en:'PREDICT', ar:'توقّعي الناتج', tag:'النشاط المنهجي صفحة 199', color:'#8b3fd1',
+   items:[
+    { title:'السؤال ١: ماذا يُطبع؟', html:'<p>اكتبي توقعك في ورقتك، وقارنيه بزميلتك، ثم اكشفي الحل.</p>', code:'for i in range(4, 0, -1):\n    print(i)', output:N('4 3 2 1'), hide:true, note:'عدّ عكسي، والرقم 0 غير مدرج',
+      lab:L('اكتبي الكود وشغّليه لتتأكدي من توقعك: 4 ثم 3 ثم 2 ثم 1.','',N('4 3 2 1'),'for i in range(4, 0, -1):\n    print(i)','البداية 4 والخطوة -1 والنهاية 0.','الخطوة -1 تجعل العدّ عكسيًا، وينتهي قبل 0.') },
+    { title:'السؤال ٢: ماذا يُطبع؟', html:'<p>اكتبي توقعك ثم اكشفي الحل.</p>', code:'for i in range(0, 10, 2):\n    print(i)', output:N('0 2 4 6 8'), hide:true, note:'٥ أرقام: الخطوة 2 وينتهي قبل 10',
+      lab:L('اكتبي الكود وشغّليه، ثم عدّلي النهاية إلى 12 لتري أي رقم يُضاف.','for i in range(0, 10, 2):\n    print(i)',N('0 2 4 6 8 10'),'for i in range(0, 12, 2):\n    print(i)','النهاية غير مدرجة: لتظهر 10 اجعليها أكبر من 10 وحتى 12.','مع النهاية 12 يظهر 10 لأنه أقل من 12.',{needArgs:3}) }
+   ],
+   challenge:L('توقعي ثم جرّبي: اطبعي 1 ثم 4 ثم 7 ثم 10.','',N('1 4 7 10'),'for i in range(1, 11, 3):\n    print(i)','الخطوة 3 والنهاية 11.','1 و4 و7 و10، وتتوقف قبل 11.',{needArgs:3}) },
+
+ { id:'class15', kind:'lesson', num:'5', en:'CLASS EXAMPLE', ar:'مثال: درجات صف كامل', tag:'عدد التكرارات معروف ← for', color:'#c2335a',
+   items:[
+    { title:'التحقق من درجات صف مكوَّن من ١٥ طالبة', html:'<p>بدل كتابة أوامر التحقق ١٥ مرة، نكتبها مرة واحدة داخل حلقة تتكرر ١٥ مرة. عدد التكرارات معروف ← نستخدم <b>for</b>.</p>',
+      code:'for st in range(0, 15):\n    # repeat for each student', output:N('0 1 2 3 4 5 6 7 8 9 10 11 12 13 14').slice(0,15),
+      lab:L('اطبعي رقم كل طالبة من 1 إلى 15 باستخدام حلقة واحدة.','',N('1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'),'for st in range(1, 16):\n    print(st)','ابدئي من 1 وانتهي بـ 16.','range(1, 16) تعدّ من 1 إلى 15.',{needArgs:2}) }
+   ],
+   challenge:L('اطبعي «طالبة 1» ثم «طالبة 2» حتى «طالبة 5».','',[1,2,3,4,5].map(n=>'طالبة '+n),'for i in range(1, 6):\n    print("طالبة", i)','print("طالبة", i) تفصل بمسافة تلقائيًا.','أضفنا نصًا ثابتًا ثم قيمة العدّاد.') }
+];
+
+/* ---------------- الأنشطة: إشارة المرور ---------------- */
+const TLN = [['g','صحيحة'],['y','صحيحة جزئيًا / تحتاج تعديل'],['r','غير صحيحة']];
+const tl = [
+ { id:'show', kind:'tl-show', num:'6', en:'COLOR SHOW', ar:'ارفعي اللون المناسب', tag:'كشف سريع للفهم والأخطاء الشائعة', color:'#12a150',
+   legend:{g:'صحيحة',y:'صحيحة جزئيًا / تحتاج تعديل',r:'غير صحيحة'},
+   items:[
+    { q:'ينتج عن هذا الكود الرقمان 1 ثم 3 فقط.', code:'for i in range(1, 5, 2):\n    print(i)', ans:'g', why:'العدّاد يبدأ من 1 ويزيد بمقدار 2 وينتهي قبل الرقم 5: فيظهر 1 ثم 3.',
+      lab:L('اكتبي حلقة تطبع الأعداد الفردية: 1 ثم 3 ثم 5 ثم 7 ثم 9.','',N('1 3 5 7 9'),'for i in range(1, 10, 2):\n    print(i)','ابدئي من 1 وزيدي 2 في كل مرة، والنهاية غير مدرجة فاجعليها 10.','البداية 1، والنهاية 10 غير مدرجة، والخطوة 2.',{needArgs:3}) },
+    { q:'ريم قالت: «range(2,5) تطبع الأرقام 2 و 3 و 4 و 5».', ans:'y', why:'البداية صحيحة لكن الرقم 5 غير مدرج.', fix:'تطبع 2 و 3 و 4 فقط.',
+      lab:L('الكود يطبع 2 و 3 و 4 فقط. عدّلي رقمًا واحدًا ليظهر الرقم 5 أيضًا.','for i in range(2, 5):\n    print(i)',N('2 3 4 5'),'for i in range(2, 6):\n    print(i)','النهاية لا تدخل في العدّ. ما الرقم الذي يجعل 5 يظهر؟','لكي يظهر 5 يجب أن تكون النهاية 6.',{needArgs:2}) },
+    { q:'سارة قالت: «range(10,5,-2) تعدّ من 10 إلى 5 وتطبع الرقم 5».', ans:'y', why:'العدّ عكسي بسبب الخطوة السالبة، لكنه يتوقف قبل 5.', fix:'تطبع 10 ثم 8 ثم 6.',
+      lab:L('اكتبي حلقة تعدّ تنازليًا وتطبع: 10 ثم 8 ثم 6 ثم 4 ثم 2.','',N('10 8 6 4 2'),'for i in range(10, 1, -2):\n    print(i)','الخطوة سالبة (-2) والنهاية أقل من 2، جرّبي 1.','العدّ يتوقف قبل 1، فيظهر 2 كآخر رقم.',{needArgs:3}) },
+    { q:'كتبت منى الكود التالي وقالت: «سيعمل بلا أي مشكلة».', code:'for i in range(3):\nprint(i)', ans:'r', why:'السطر المتكرر بلا مسافة بادئة، فستظهر رسالة خطأ.', fix:'اتركي مسافة بادئة قبل print(i).',
+      lab:L('شغّلي الكود لتري رسالة الخطأ، ثم أصلحيه ليطبع 0 ثم 1 ثم 2.','for i in range(3):\nprint(i)',N('0 1 2'),'for i in range(3):\n    print(i)',IND,'المسافة البادئة تضع الأمر داخل الحلقة.') },
+    { q:'في range(5) يبدأ العدّاد من 1 وينتهي عند 5.', ans:'r', why:'هنا خلط في بداية العدّ ونهايته.', fix:'يبدأ من 0 ويزيد بمقدار 1، وينتهي قبل 5 أي عند 4.',
+      lab:L('الكود يطبع من 0 إلى 4. عدّليه ليطبع من 1 إلى 5.','for i in range(5):\n    print(i)',N('1 2 3 4 5'),'for i in range(1, 6):\n    print(i)','حدّدي البداية 1، والنهاية 6 لأنها غير مدرجة.','range(1, 6) تبدأ من 1 وتنتهي عند 5.',{needArgs:2}) },
+    { q:'القيمة الثالثة في range تحدد مقدار الزيادة، ويمكن أن تكون سالبة فيصير العدّ عكسيًا.', ans:'g', why:'القيمة التلقائية للزيادة 1، ويمكن تحديدها بقيمة ثالثة، وإن كانت سالبة صار العدّ عكسيًا.',
+      lab:L('اطبعي: 10 ثم 7 ثم 4 ثم 1 بخطوة سالبة.','',N('10 7 4 1'),'for i in range(10, 0, -3):\n    print(i)','الخطوة -3 والنهاية 0.','10 ثم 7 ثم 4 ثم 1، والرقم التالي -2 أقل من النهاية.',{needArgs:3}) }
+   ],
+   challenge:L('اطبعي مضاعفات العدد 3 من 3 إلى 30.','',N('3 6 9 12 15 18 21 24 27 30'),'for i in range(3, 31, 3):\n    print(i)','خطوة 3، أو اضربي i في 3 مع range(1, 11).','البداية والخطوة 3، والنهاية 31.') },
+
+ { id:'opinion', kind:'tl-opinion', num:'7', en:'OPINION LIGHT', ar:'عبّري عن رأيك', tag:'استخدمي معرفتك لتبرير موقفك', color:'#e89b00',
+   legend:{g:'أوافق',y:'غير متأكدة / أحتاج أفكر أكثر',r:'لا أوافق'}, field:'رأيي لأن… / الدليل…',
+   items:[
+    { q:'أرى أن الحل الأذكى لمبرمج يريد أن تدور السلحفاة 45 مرة (أو أن تومض اللمبة 100 مرة) هو حلقة for بدل تكرار الأمر.', lean:'g', hint:'الحلقات توفر الوقت والجهد عند تكرار مجموعة من الأوامر.',
+      lab:L('بدل كتابة print خمس مرات: اطبعي كلمة «وميض» خمس مرات بحلقة for.','',rep('وميض',5),'for i in range(5):\n    print("وميض")','range(5) تكرر الحلقة 5 مرات.','سطران يكفيان مهما كان عدد المرات.',{needArgs:1}) },
+    { q:'أعتقد أن حلقة for مناسبة للتحقق من درجات صف كامل مكوَّن من 15 طالبة.', lean:'g', hint:'عدد التكرارات معروف سابقًا (15)، وهذا مجال حلقة for مع دالة range.',
+      lab:L('اطبعي «طالبة 1» ثم «طالبة 2» حتى «طالبة 5» (للتجربة).','',[1,2,3,4,5].map(n=>'طالبة '+n),'for i in range(1, 6):\n    print("طالبة", i)','print("طالبة", i) تفصل بين القيمتين بمسافة.','تتكرر الحلقة بعدد الطالبات المعروف مسبقًا.') },
+    { q:'أرى أن بداية العدّ من 0 في range تجعلها غير مناسبة، فالعدّ يجب أن يبدأ من 1.', lean:'y', hint:'البداية التلقائية 0، لكن يمكن تحديد البداية بإضافة قيمة، مثل range(2,5).',
+      lab:L('اطبعي 0 و 1 و 2 و 3 و 4 باستخدام قيمة واحدة فقط داخل range.','for i in range():\n    print(i)',N('0 1 2 3 4'),'for i in range(5):\n    print(i)','عند كتابة قيمة واحدة تبدأ range من 0 تلقائيًا.','البداية التلقائية 0، وهذا مناسب كثيرًا في البرمجة.',{needArgs:1}) },
+    { q:'هذا يعني أن المسافة البادئة تفصيل جمالي، ويمكن تجاهلها في بايثون.', lean:'r', hint:'إذا لم تتركي مسافة بادئة في مقطعك البرمجي فستتلقين رسالة خطأ.',
+      lab:L('شغّلي الكود وراقبي: «انتهينا» تظهر مرة واحدة. أدخلي السطر الأخير في الحلقة فتظهر بعد كل خطوة.','for i in range(3):\n    print("خطوة", i)\nprint("انتهينا")',['خطوة 0','انتهينا','خطوة 1','انتهينا','خطوة 2','انتهينا'],'for i in range(3):\n    print("خطوة", i)\n    print("انتهينا")','أضيفي أربع مسافات قبل آخر print.','المسافة تحدد ما يتكرر: ليست تفصيلًا جماليًا.') }
+   ],
+   challenge:L('اطبعي مربعات الأعداد من 1 إلى 5.','',N('1 4 9 16 25'),'for i in range(1, 6):\n    print(i * i)','i * i أو i ** 2.','نضرب العدّاد في نفسه.') },
+
+ { id:'move', kind:'tl-move', num:'8', en:'MOVE WITH THE LIGHT', ar:'استجيبي بالحركة', tag:'اربطي التفكير بحركة واضحة', color:'#d8343a',
+   legend:{g:'يستمر العدّ',y:'تحتاج تعديلًا',r:'ينتهي العدّ'}, moves:{g:'ارفعي يديك عاليًا وصفّقي مرة',y:'ضعي يدك على ذقنك وتوقفي لحظة',r:'اعقدي ذراعيك على شكل X وقفي ثابتة'},
+   items:[
+    { q:'في range(2,5) وصل العدّاد الآن إلى 3. ماذا يحدث؟', ans:'g', why:'3 ضمن النطاق (2 و 3 و 4)، فيُنفَّذ التكرار ويستمر العدّ.',
+      lab:L('اكتبي حلقة تطبع قيم العدّاد في range(2, 5).','',N('2 3 4'),'for i in range(2, 5):\n    print(i)','range بقيمتين: البداية ثم النهاية.','ستمر القيم 2 ثم 3 ثم 4.',{needArgs:2}) },
+    { q:'في range(2,5) وصل العدّاد إلى 5. ماذا يحدث؟', ans:'r', why:'القيمة 5 غير مدرجة: ينتهي العدّ عند 4.',
+      lab:L('اطبعي 1 إلى 5، وبعد انتهاء الحلقة اطبعي «انتهى العدّ» مرة واحدة.','',[...N('1 2 3 4 5'),'انتهى العدّ'],'for i in range(1, 6):\n    print(i)\nprint("انتهى العدّ")','السطر الذي يُنفَّذ مرة واحدة بعد الحلقة يُكتب بلا مسافة.','عند انتهاء العدّ ينتقل البرنامج إلى السطر بعد الحلقة.') },
+    { q:'كتبتِ أمر print داخل حلقة for بلا مسافة بادئة. ما التصرف المناسب؟', ans:'y', why:'سيظهر خطأ: عدّلي الكود وأضيفي مسافة بادئة قبل print.',
+      lab:L('أصلحي الكود ليطبع «مرحبا» مرتين.','for i in range(2):\nprint("مرحبا")',rep('مرحبا',2),'for i in range(2):\n    print("مرحبا")',IND,'أضفنا المسافة فصار print داخل الحلقة.') },
+    { q:'في range(10,5,-2) العدّاد الآن 8. ماذا يحدث؟', ans:'g', why:'العدّ عكسي بخطوة -2: بعد 10 يأتي 8 ثم 6، فيستمر العدّ.',
+      lab:L('اكتبي حلقة تطبع 10 ثم 8 ثم 6 (تتوقف قبل 5).','',N('10 8 6'),'for i in range(10, 5, -2):\n    print(i)','range(10, 5, -2).','10 ثم 8 ثم 6، ثم يتوقف لأن الرقم التالي (4) أقل من النهاية 5.',{needArgs:3}) },
+    { q:'في range(10,5,-2) طُبع الرقم 6 للتو. هل نستمر ونطبع 4؟', ans:'r', why:'لا: العدّ ينتهي عند 6 لأن النطاق ينتهي قبل 5، فلا تُطبع قيم أخرى.',
+      lab:L('اطبعي ضعف كل عدد من 1 إلى 5: 2 ثم 4 ثم 6 ثم 8 ثم 10.','',N('2 4 6 8 10'),'for i in range(1, 6):\n    print(i * 2)','اضربي العدّاد في 2.','نضرب كل قيمة من 1 إلى 5 في 2.') }
+   ],
+   challenge:L('عدّ تنازلي لإطلاق صاروخ: 5 ثم 4 ثم 3 ثم 2 ثم 1، وبعد الحلقة اطبعي «انطلق!».','',[...N('5 4 3 2 1'),'انطلق!'],'for i in range(5, 0, -1):\n    print(i)\nprint("انطلق!")','العدّ التنازلي بخطوة -1، ثم print خارج الحلقة.','العدّ ينتهي ثم يُنفَّذ السطر الأخير مرة واحدة.') }
+];
+
+/* ---------------- الأنشطة: الاستجابة الحركية TPR ---------------- */
+const tpr = [
+ { id:'thumb', kind:'thumb', num:'9', en:'THUMB METER', ar:'مقياس الإبهام', tag:'فكّري ← اختاري ← برّري ← أعيدي التفكير', color:'#2750d8',
+   items:[
+    { q:'حلقة for مناسبة عندما نعرف عدد التكرارات مسبقًا.', ans:'up', why:'عدد التكرارات يُحدَّد بقيم دالة النطاق range().',
+      lab:L('اطبعي كلمة «بايثون» أربع مرات بحلقة for.','',rep('بايثون',4),'for i in range(4):\n    print("بايثون")','عدد التكرارات 4 معروف مسبقًا.','معرفة العدد سلفًا هي سبب اختيار for.',{needArgs:1}) },
+    { q:'في range(5) يبدأ العدّاد من 1 وينتهي عند 5.', ans:'down', tip:'اطلبي من طالبة تبرير اختيارها.', why:'العدّاد يبدأ من 0 ويزيد بمقدار 1، وينتهي قبل الرقم 5 (أي عند 4).',
+      lab:L('باستخدام range(5) فقط، اطبعي ‎i * 10‎ لتحصلي على: 0 ثم 10 ثم 20 ثم 30 ثم 40.','',N('0 10 20 30 40'),'for i in range(5):\n    print(i * 10)','القيم 0 إلى 4 تُضرب في 10.','العدّاد يبدأ من 0 وينتهي عند 4.',{needArgs:1}) },
+    { q:'إذا لم أترك مسافة بادئة داخل الحلقة فسيعمل الكود بلا مشكلة.', ans:'down', why:'المقطع البرمجي لا يتعرف على أوامر الحلقة بدون مسافة بادئة، فتظهر رسالة خطأ.',
+      lab:L('أصلحي الكود ليطبع 1 ثم 4 ثم 9.','for i in range(1, 4):\nprint(i * i)',N('1 4 9'),'for i in range(1, 4):\n    print(i * i)',IND,'المسافة البادئة تضع الأمر داخل الحلقة.') },
+    { q:'حلقة for قد لا تُنفَّذ أبدًا.', ans:'side', evidence:true, after:'up', tip:'اعرضي الدليل ثم اسمحي لمن تريد بتغيير إجابتها.', why:'الدليل: إذا كان النطاق فارغًا مثل range(3,3) أو range(0) فلن يُنفَّذ الأمر داخل الحلقة أبدًا. إذن الإجابة الصحيحة 👍',
+      lab:L('غيّري range ليصبح النطاق فارغًا فلا تُنفَّذ الحلقة أبدًا، ويظهر «انتهى» فقط.','for i in range(5):\n    print(i)\nprint("انتهى")',['انتهى'],'for i in range(0):\n    print(i)\nprint("انتهى")','range(0) أو range(3, 3) لا تنتجان أي قيمة.','النطاق الفارغ لا ينتج قيمًا فلا يتكرر شيء.') },
+    { q:'في حلقة for يجب أن أكتب سطر i = i + 1 داخل الحلقة لكي يتغير العدّاد.', ans:'down', why:'العدّاد يتغير تلقائيًا في كل تكرار بقيم range()، فلا نغيّره بأنفسنا.',
+      lab:L('اطبعي «العدّاد: 1» ثم «العدّاد: 2» ثم «العدّاد: 3» دون أن تكتبي i = i + 1.','',[1,2,3].map(n=>'العدّاد: '+n),'for i in range(1, 4):\n    print("العدّاد:", i)','استخدمي print("العدّاد:", i).','الحلقة تغيّر i تلقائيًا.') }
+   ],
+   challenge:L('المجموع التراكمي: اطبعي بعد كل إضافة مجموع الأعداد من 1 إلى 5 (1 ثم 3 ثم 6 ثم 10 ثم 15).','total = 0\nfor i in range(1, 6):\n    total += 0\n    print(total)',N('1 3 6 10 15'),'total = 0\nfor i in range(1, 6):\n    total += i\n    print(total)','أضيفي i بدل 0.','نضيف قيمة العدّاد إلى المجموع في كل تكرار.') },
+
+ { id:'abcd', kind:'abcd', num:'10', en:'BODY A-B-C-D', ar:'الإجابة بالجسم', tag:'A فوق الرأس · B الكتفان · C تقاطع · D دائرة', color:'#0e8f6b',
+   items:[
+    { type:'تحديد المفهوم', q:'ما اسم المتغير الذي يحسب عدد التكرارات مع دالة النطاق range()؟', o:['العدّاد (counter)','الشرط','المسافة البادئة','عبارة الإيقاف'], ans:'A', why:'يُسمّى المتغير الذي يحسب التكرار العدّاد (counter).',
+      lab:L('غيّري اسم العدّاد من i إلى n (أو أي اسم آخر)، وابقي الناتج 1 ثم 2 ثم 3.','for i in range(1, 4):\n    print(i)',N('1 2 3'),'for n in range(1, 4):\n    print(n)','غيّريه في سطر for وفي print معًا.','اسم العدّاد حر، المهم أن نستخدمه بالاسم نفسه.',{needVar:true}) },
+    { type:'اختيار المثال الصحيح', q:'أي نطاق يجعل العدّاد يطبع 2 ثم 3 ثم 4؟', o:['range(2,5)','range(2,4)','range(3,5)','range(5)'], ans:'A', why:'يبدأ العدّاد من 2 وينتهي عند 4، والقيمة 5 غير مدرجة.',
+      lab:L('اطبعي 5 ثم 6 ثم 7.','',N('5 6 7'),'for i in range(5, 8):\n    print(i)','النهاية 8.','البداية 5 والنهاية 8 غير مدرجة.',{needArgs:2}) },
+    { type:'اكتشاف الخطأ', q:'ما الخطأ في الكود؟', code:'for i in range(3):\nprint(i)', o:['الأمر print لا يُستخدم هنا','ينقص مسافة بادئة قبل print','range لا تُستخدم مع for','الرقم 3 غير مسموح'], ans:'B', why:'الأمر المتكرر يحتاج مسافة بادئة، وإلا ظهرت رسالة خطأ.',
+      lab:L('هذا الكود فيه مسافتان غير متساويتين. أصلحيه ليتكرر الأمران معًا.','for i in range(3):\n    print("بداية", i)\n  print("نهاية", i)',['بداية 0','نهاية 0','بداية 1','نهاية 1','بداية 2','نهاية 2'],'for i in range(3):\n    print("بداية", i)\n    print("نهاية", i)','اجعلي أسطر الحلقة كلها بأربع مسافات.','أسطر الحلقة تشترك في المسافة نفسها.') },
+    { type:'توقّع النتيجة', q:'ماذا يطبع هذا الكود؟', code:'for i in range(10, 5, -2):\n    print(i)', o:['10 ، 8 ، 6','10 ، 8 ، 6 ، 5','6 ، 8 ، 10','5 ، 7 ، 9'], ans:'A', why:'الخطوة سالبة فيصير العدّ عكسيًا: 10 ثم 8 ثم 6، ويتوقف قبل 5.',
+      lab:L('عدّ تنازلي بخطوة 5: اطبعي 20 ثم 15 ثم 10.','',N('20 15 10'),'for i in range(20, 9, -5):\n    print(i)','الخطوة -5 والنهاية 9 حتى يظهر 10.','20 ثم 15 ثم 10، والتالي 5 أقل من 9.',{needArgs:3}) },
+    { type:'تحديد السبب', q:'لماذا لا يظهر الرقم 5 في for i in range(1, 5)؟', o:['لأن النهاية في range غير مدرجة','لأن العدّاد يبدأ من 5','لأن print لا تطبع الأرقام','لأن المسافة البادئة ناقصة'], ans:'A', why:'القيمة الثانية في range هي نهاية غير مدرجة.',
+      lab:L('اطبعي الأعداد الزوجية: 2 ثم 4 ثم 6 ثم 8 ثم 10.','',N('2 4 6 8 10'),'for i in range(2, 11, 2):\n    print(i)','البداية 2 والخطوة 2 والنهاية 11.','النهاية 11 تُدخل العدد 10.',{needArgs:3}) }
+   ],
+   challenge:L('جدول ضرب 7: اطبعي 7 ثم 14 ثم 21 ثم 28 ثم 35.','',N('7 14 21 28 35'),'for i in range(1, 6):\n    print(i * 7)','i * 7 مع range(1, 6).','نضرب 7 في كل عدّاد من 1 إلى 5.') },
+
+ { id:'step', kind:'step', num:'11', en:'STEP – BACK – FREEZE', ar:'تحرّكي حسب قرارك', tag:'للأمام: نعم · للخلف: لا · ثبات: أحتاج معلومات', color:'#c9710a',
+   items:[
+    { q:'مبرمجة تريد تكرار أوامر لـ 15 طالبة (عدد معروف). هل تناسبها حلقة for؟', ans:'fwd', why:'عدد التكرارات محدد سابقًا (15)، وهذا هو مجال for.',
+      lab:L('اطبعي رقم كل طالبة من 1 إلى 15.','',N('1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'),'for i in range(1, 16):\n    print(i)','النهاية 16.','15 طالبة = 15 تكرارًا.',{needArgs:2}) },
+    { q:'هل ستطبع range(1,5,-1) أرقامًا؟', ans:'back', why:'الخطوة سالبة والبداية أصغر من النهاية، فلا توجد قيم: الحلقة لا تعمل.',
+      lab:L('الكود لا يطبع شيئًا. أصلحيه ليطبع 1 ثم 2 ثم 3 ثم 4.','for i in range(1, 5, -1):\n    print(i)',N('1 2 3 4'),'for i in range(1, 5):\n    print(i)','احذفي الخطوة السالبة أو اجعليها 1.','العدّ التصاعدي يحتاج خطوة موجبة.') },
+    { q:'range(0, 10, x) ولا نعرف قيمة x بعد. هل ستطبع 5 أرقام؟', ans:'freeze', why:'نحتاج قيمة x: مع 2 تطبع 5 أرقام (0 2 4 6 8)، ومع 1 تطبع 10 أرقام.',
+      lab:L('اجعلي الحلقة تطبع 5 أرقام فقط: 0 ثم 2 ثم 4 ثم 6 ثم 8.','for i in range(0, 10):\n    print(i)',N('0 2 4 6 8'),'for i in range(0, 10, 2):\n    print(i)','أضيفي الخطوة المناسبة.','الخطوة 2 تجعل العدد 5 أرقام.',{needArgs:3}) },
+    { q:'هل يمكن وضع حلقة for داخل حلقة for أخرى؟', ans:'fwd', why:'نعم، تُسمّى حلقة متداخلة، وتكتمل الداخلية مع كل تكرار للخارجية.',
+      lab:L('اكتبي حلقة داخل حلقة تطبع أزواجًا: «1 1» ثم «1 2» ثم «2 1» ثم «2 2».','',['1 1','1 2','2 1','2 2'],'for i in range(1, 3):\n    for j in range(1, 3):\n        print(i, j)','الحلقة الداخلية تُكتب بمسافة بادئة إضافية.','تكتمل الداخلية مع كل قيمة للخارجية.') },
+    { q:'في range(2,5)، هل سيظهر الرقم 5؟', ans:'back', why:'الرقم 5 غير مدرج: ينتهي العدّ عند 4.',
+      lab:L('اطبعي 5 أرقام تبدأ من 2: 2 ثم 3 ثم 4 ثم 5 ثم 6.','',N('2 3 4 5 6'),'for i in range(2, 7):\n    print(i)','النهاية 7.','خمسة أرقام من 2 تنتهي عند 6.',{needArgs:2}) }
+   ],
+   challenge:L('اطبعي الأعداد الزوجية تنازليًا من 20 إلى 2.','',N('20 18 16 14 12 10 8 6 4 2'),'for i in range(20, 1, -2):\n    print(i)','الخطوة -2 والنهاية 1.','تنازل بخطوة 2 حتى 2.',{needArgs:3}) },
+
+ { id:'acq', kind:'acq', num:'12', en:'AGREE – CHALLENGE – QUESTION', ar:'رأيي في الفكرة', tag:'أوافق · عندي اعتراض · عندي سؤال', color:'#c2335a',
+   items:[
+    { q:'إحدى الطالبات تعتقد أن range(1,5) تطبع الأرقام من 1 إلى 5.', lean:'chal', why:'نقطة نقاش: النهاية غير مدرجة، فتطبع 1 و 2 و 3 و 4.',
+      lab:L('عدّلي الكود ليطبع 1 إلى 5، ثم اطبعي «تم» بعد الحلقة.','for i in range(1, 5):\n    print(i)',[...N('1 2 3 4 5'),'تم'],'for i in range(1, 6):\n    print(i)\nprint("تم")','النهاية 6، و«تم» خارج الحلقة.','النهاية غير مدرجة فنكتب 6.') },
+    { q:'يمكننا القول إن range(0,10,2) و range(0,9,2) تعطيان النتيجة نفسها.', lean:'agree', why:'نقطة نقاش: كلتاهما تطبعان 0 و 2 و 4 و 6 و 8.',
+      lab:L('اكتبي حلقتين متتاليتين: range(0,10,2) ثم range(0,9,2) وقارني النتيجتين.','',[...N('0 2 4 6 8'),...N('0 2 4 6 8')],'for i in range(0, 10, 2):\n    print(i)\nfor i in range(0, 9, 2):\n    print(i)','اكتبي حلقة for كاملة مرتين.','النتيجتان متطابقتان.',{needFors:2}) },
+    { q:'السبب الرئيسي لاستخدام خطوة سالبة أننا نريد العدّ عكسيًا.', lean:'agree', why:'نقطة نقاش: الخطوة السالبة تجعل العدّاد ينقص، ويجب أن تكون البداية أكبر من النهاية.',
+      lab:L('اطبعي 9 ثم 8 ثم 7 ثم 6.','',N('9 8 7 6'),'for i in range(9, 5, -1):\n    print(i)','الخطوة -1 والنهاية 5.','عدّ تنازليّ.',{needArgs:3}) },
+    { q:'أعتقد أن أي أمر يُكتب بعد الحلقة يتكرر معها دائمًا، فهل هذا صحيح؟', lean:'ques', why:'نقطة نقاش: الأمر الذي يُكتب بلا مسافة بادئة بعد الحلقة يُنفَّذ مرة واحدة بعد انتهائها. اطلبي دليلًا من الطالبتين.',
+      lab:L('اطبعي «بداية» قبل الحلقة، ثم 1 و 2 داخل الحلقة، ثم «نهاية» بعدها.','',['بداية','1','2','نهاية'],'print("بداية")\nfor i in range(1, 3):\n    print(i)\nprint("نهاية")','قبل الحلقة وبعدها بلا مسافة.','ما كان بلا مسافة يُنفَّذ مرة واحدة.') }
+   ],
+   challenge:L('اطبعي العدد ومربعه: «1 1» ثم «2 4» ثم «3 9» ثم «4 16».','',['1 1','2 4','3 9','4 16'],'for i in range(1, 5):\n    print(i, i * i)','print(i, i * i).','نطبع قيمتين في السطر الواحد.') },
+
+ { id:'conf', kind:'conf', num:'13', en:'CONFIDENCE SIGNAL', ar:'إجابتي + مدى ثقتي', tag:'اختاري الإجابة ثم قيّمي ثقتك من ١ إلى ٥', color:'#8b3fd1',
+   scale:[[1,'خمّنت'],[2,'عندي فكرة بسيطة'],[3,'شبه متأكدة'],[4,'متأكدة'],[5,'أستطيع أن أشرحها لزميلتي']],
+   items:[
+    { q:'كم رقمًا يطبع هذا الكود؟', code:'for i in range(0, 10, 2):\n    print(i)', o:['4 أرقام','5 أرقام','10 أرقام','9 أرقام'], ans:'B', why:'يطبع 0 ، 2 ، 4 ، 6 ، 8 — أي 5 أرقام.',
+      lab:L('اجعلي الكود يطبع عدد الأرقام في النهاية. أضيفي سطرًا يزيد count داخل الحلقة.','count = 0\nfor i in range(0, 10, 2):\n    print(i)\n    # زيدي count هنا\nprint("العدد:", count)',[...N('0 2 4 6 8'),'العدد: 5'],'count = 0\nfor i in range(0, 10, 2):\n    print(i)\n    count += 1\nprint("العدد:", count)','count += 1 داخل الحلقة.','كل تكرار يزيد count بواحد فيصير 5.') },
+    { q:'ما آخر رقم يُطبع في هذا الكود؟', code:'for i in range(3, 9, 2):\n    print(i)', o:['9','8','7','6'], ans:'C', why:'3 ثم 5 ثم 7، والرقم 9 غير مدرج.',
+      lab:L('اطبعي 3 ثم 5 ثم 7 باستخدام range بثلاث قيم.','',N('3 5 7'),'for i in range(3, 9, 2):\n    print(i)','البداية 3 والخطوة 2.','3 ثم 5 ثم 7.',{needArgs:3}) },
+    { q:'ماذا يطبع هذا الكود؟', code:'for i in range(4, 0, -1):\n    print(i)', o:['4 ، 3 ، 2 ، 1','4 ، 3 ، 2 ، 1 ، 0','0 ، 1 ، 2 ، 3 ، 4','1 ، 2 ، 3 ، 4'], ans:'A', repeat:true, explain:'شرح قصير: الخطوة -1 تجعل العدّ عكسيًا، وينتهي العدّ قبل الرقم المحدد (0)، فلا يُطبع.', why:'4 ، 3 ، 2 ، 1 — والرقم 0 غير مدرج.',
+      lab:L('اجعلي العدّ ينتهي عند 0 أيضًا: 4 ثم 3 ثم 2 ثم 1 ثم 0.','for i in range(4, 0, -1):\n    print(i)',N('4 3 2 1 0'),'for i in range(4, -1, -1):\n    print(i)','النهاية يجب أن تكون أقل من 0.','النهاية -1 تُدخل الصفر.',{needArgs:3}) },
+    { q:'كم مرة تُنفَّذ هذه الحلقة؟', code:'for i in range(2, 12, 5):\n    print(i)', o:['مرة واحدة','مرتين','3 مرات','5 مرات'], ans:'B', why:'يطبع 2 ثم 7 — القيمة 12 غير مدرجة.',
+      lab:L('اطبعي القيمتين 2 و 7 فقط.','',N('2 7'),'for i in range(2, 12, 5):\n    print(i)','البداية 2 والخطوة 5.','2 ثم 7.',{needArgs:3}) }
+   ],
+   challenge:L('اطبعي مربعات الأعداد الزوجية 2 و 4 و 6 و 8: 4 ثم 16 ثم 36 ثم 64.','',N('4 16 36 64'),'for i in range(2, 9, 2):\n    print(i * i)','الخطوة 2 ثم i * i.','نربّع كل عدد زوجي.') },
+
+ { id:'speed', kind:'speed', num:'14', en:'SPEED ROUND', ar:'جولة الاستجابة السريعة', tag:'ستة أسئلة متتالية بحركات مختلفة', color:'#d8343a',
+   items:[
+    { mode:'thumb', label:'Round 1 · الإبهام', q:'المسافة البادئة داخل الحلقة اختيارية في بايثون.', ans:'down', why:'👎 مهمة جدًا؛ بدونها تظهر رسالة خطأ.',
+      lab:L('أصلحي الكود ليطبع «نعم» مرتين.','for i in range(2):\nprint("نعم")',rep('نعم',2),'for i in range(2):\n    print("نعم")',IND,'المسافة تضع الأمر داخل الحلقة.') },
+    { mode:'step', label:'Round 2 · الخطوة', q:'range(1,5,2) تطبع الرقمين 1 و 3.', ans:'fwd', why:'خطوة للأمام: العدّ يبدأ من 1 ويزيد بمقدار 2 وينتهي قبل 5.',
+      lab:L('اطبعي 1 ثم 4 ثم 7.','',N('1 4 7'),'for i in range(1, 8, 3):\n    print(i)','الخطوة 3.','1 ثم 4 ثم 7.',{needArgs:3}) },
+    { mode:'abcd', label:'Round 3 · A-B-C-D', q:'ما الدالة التي تحدد قيم العدّاد في حلقة for؟', o:['range','print','str','len'], ans:'A', why:'الدالة range تُنتج قيم العدّاد.',
+      lab:L('اكتبي حلقة تطبع 0 ثم 1 ثم 2 ثم 3.','',N('0 1 2 3'),'for i in range(4):\n    print(i)','range(4).','range(4) تنتج 0 إلى 3.') },
+    { mode:'acq', label:'Round 4 · موافقة / اعتراض / سؤال', q:'range(5,1) تطبع 5 ثم 4 ثم 3 ثم 2.', ans:'chal', why:'✋ اعتراض: الخطوة الافتراضية +1، فلا يوجد عدّ تنازلي ولا يظهر أي رقم.',
+      lab:L('الكود لا يطبع شيئًا. أصلحيه ليطبع 5 ثم 4 ثم 3 ثم 2.','for i in range(5, 1):\n    print(i)',N('5 4 3 2'),'for i in range(5, 1, -1):\n    print(i)','أضيفي الخطوة -1.','الخطوة السالبة تفعّل العدّ التنازلي.',{needArgs:3}) },
+    { mode:'conf', label:'Round 5 · الثقة', q:'ماذا يطبع range(20, 10, -4)؟ ثم أظهري ثقتك بأصابعك.', o:['20 ، 16 ، 12','20 ، 16 ، 12 ، 8','12 ، 16 ، 20','20 ، 16 ، 12 ، 10'], ans:'A', why:'20 ثم 16 ثم 12، والتالي 8 أقل من النهاية 10.',
+      lab:L('اكتبي حلقة تطبع 20 ثم 16 ثم 12.','',N('20 16 12'),'for i in range(20, 10, -4):\n    print(i)','range(20, 10, -4).','نتأكد بالتجربة.',{needArgs:3}) },
+    { mode:'spin', label:'Round 6 · حركة الحلقة', q:'لفّي ثلاث لفّات كاملة لتمثلي range(3) ثم ثبتي: كل لفّة تكرار واحد.', ans:'spin', why:'range(3) تنفّذ الحلقة 3 مرات (0 و 1 و 2) ثم تتوقف.',
+      lab:L('اطبعي «لفّة 1» ثم «لفّة 2» ثم «لفّة 3» باستخدام range(3).','',[1,2,3].map(n=>'لفّة '+n),'for i in range(3):\n    print("لفّة", i + 1)','استخدمي i + 1.','العدّاد يبدأ من 0 فنضيف 1.',{needArgs:1}) }
+   ],
+   challenge:L('مثلث النجوم: اطبعي * ثم ** ثم *** ثم ****','',['*','**','***','****'],'for i in range(1, 5):\n    print("*" * i)','"*" * i تكرر النجمة i مرة.','نكرر النجمة بعدد العدّاد.') }
+];
+
+
+const exitSt = { id:'exit', kind:'lesson', num:'15', en:'WRAP UP', ar:'ملخص الدرس وسؤالا الخروج', tag:'ثلاث أفكار ثم سؤالان على ورقة صغيرة', color:'#243b6b',
+  items:[
+   { title:'ملخص الدرس', html:'<div class="sum3"><div><b>for</b><span>نكرر الأوامر عندما يكون عدد التكرارات محددًا سابقًا</span></div><div><b>مسافة بادئة</b><span>الأوامر المتكررة تُكتب بمسافة بادئة وإلا ظهر خطأ</span></div><div><b>range</b><span>يبدأ من 0 ويزيد 1 وينتهي قبل الرقم المحدد، وفيه بداية وخطوة</span></div></div>',
+     lab:L('طبّقي الأفكار الثلاث: اطبعي الأعداد من 1 إلى 3 بحلقة for ومسافة بادئة صحيحة.','',N('1 2 3'),'for i in range(1, 4):\n    print(i)','for ثم range(1, 4) ثم print بمسافة بادئة.','اجتمعت الأفكار الثلاث في كود واحد.',{needArgs:2}) },
+   { title:'سؤال الخروج ١', html:'<p>كم رقمًا يطبع هذا الكود؟ اكتبي الإجابة على ورقة صغيرة ثم اكشفي الحل.</p>', code:'for i in range(0, 10, 2):\n    print(i)', output:N('0 2 4 6 8'), hide:true, note:'5 أرقام',
+     lab:L('أضيفي سطرًا بعد الحلقة يطبع عدد الأرقام التي ظهرت.','count = 0\nfor i in range(0, 10, 2):\n    print(i)\n    count += 1\n',[...N('0 2 4 6 8'),'5'],'count = 0\nfor i in range(0, 10, 2):\n    print(i)\n    count += 1\nprint(count)','اطبعي count بعد الحلقة، بلا مسافة بادئة.','count يعدّ التكرارات فيساوي 5.') },
+   { title:'سؤال الخروج ٢', html:'<p>ماذا يطبع هذا الكود؟ اكتبي الإجابة على ورقة صغيرة ثم اكشفي الحل.</p>', code:'for i in range(4, 0, -1):\n    print(i)', output:N('4 3 2 1'), hide:true, note:'عدّ عكسي، والرقم 0 غير مدرج',
+     lab:L('عدّلي الكود لتحصلي على عدّ تنازلي من 4 إلى 1 مضروبًا في 2: 8 ثم 6 ثم 4 ثم 2.','for i in range(4, 0, -1):\n    print(i)',N('8 6 4 2'),'for i in range(4, 0, -1):\n    print(i * 2)','اضربي i في 2 داخل print.','نفس العدّ التنازلي لكن بقيم مضاعفة.') }
+  ],
+  challenge:L('تحدي الختام: اطبعي عدًّا تنازليًا من 10 إلى 1 ثم «تم».','',[...N('10 9 8 7 6 5 4 3 2 1'),'تم'],'for i in range(10, 0, -1):\n    print(i)\nprint("تم")','الخطوة -1 والنهاية 0.','وصلتِ إلى نهاية الدرس.') };
+
+/* ---- نسخة السهل فقط: حذف الأسئلة الصعبة وتبسيط تحدي نهاية كل محطة ---- */
+const HARD = { show:[2,5], move:[3,4], thumb:[1,2], abcd:[3], step:[3], acq:[1], conf:[0,2,3], speed:[4,5], exit:[1,2] };
+const EASYCH = {
+  opinion:L('اطبعي الأعداد من 1 إلى 5.','',N('1 2 3 4 5'),'for i in range(1, 6):\n    print(i)','البداية 1 والنهاية 6.','النهاية 6 غير مدرجة فتتوقف الحلقة عند 5.'),
+  move:L('اطبعي «مرحبا» أربع مرات.','',rep('مرحبا',4),'for i in range(4):\n    print("مرحبا")','استخدمي range(4).','أربع تكرارات تعني range(4).'),
+  thumb:L('اطبعي الأعداد من 2 إلى 6.','',N('2 3 4 5 6'),'for i in range(2, 7):\n    print(i)','البداية 2 والنهاية 7.','النهاية 7 غير مدرجة.'),
+  abcd:L('اطبعي الأعداد من 0 إلى 4.','',N('0 1 2 3 4'),'for i in range(5):\n    print(i)','قيمة واحدة داخل range.','range(5) تعدّ من 0 وتتوقف قبل 5.'),
+  step:L('اطبعي الأعداد الزوجية: 2 ثم 4 ثم 6 ثم 8 ثم 10.','',N('2 4 6 8 10'),'for i in range(2, 11, 2):\n    print(i)','الخطوة 2 والنهاية 11.','نبدأ من 2 ونزيد 2 حتى 10.'),
+  acq:L('اطبعي الأعداد 3 ثم 4 ثم 5 ثم 6.','',N('3 4 5 6'),'for i in range(3, 7):\n    print(i)','البداية 3 والنهاية 7.','النهاية 7 غير مدرجة.'),
+  conf:L('عدّ تنازلي: اطبعي 5 ثم 4 ثم 3 ثم 2 ثم 1.','',N('5 4 3 2 1'),'for i in range(5, 0, -1):\n    print(i)','الخطوة -1 والنهاية 0.','نعدّ للخلف حتى 1 ونتوقف قبل 0.'),
+  speed:L('اطبعي «نجمة» ثلاث مرات.','',rep('نجمة',3),'for i in range(3):\n    print("نجمة")','range(3).','ثلاث تكرارات.'),
+  exit:L('اطبعي الأعداد من 1 إلى 5.','',N('1 2 3 4 5'),'for i in range(1, 6):\n    print(i)','البداية 1 والنهاية 6.','النهاية 6 غير مدرجة.'),
+  thumbx:null
+};
+[...lesson, ...tl, ...tpr, exitSt].forEach(st => {
+  if (HARD[st.id]) st.items = st.items.filter((_, i) => !HARD[st.id].includes(i));
+  if (EASYCH[st.id]) st.challenge = EASYCH[st.id];
+  st.items.forEach((it, i) => { if (i > 0) delete it.lab; });
+  if (st.id === 'learn1') st.items.unshift(
+    { title:'الحلقات (Loops): حلقة for ودالة range', html:'<div class="goal-h"><span>الوحدة الثالثة: البرمجة مع بايثون · الدرس الخامس</span></div><p>اليوم نتعلم كيف نجعل بايثون تكرر الأوامر بدلًا منا، بنشاط إشارة المرور <span class="en">Traffic Light Response</span>.</p><div class="goals g3"><i class="r">🔴 أرفع الأحمر: غير صحيح</i><i class="y">🟡 أرفع الأصفر: غير متأكدة</i><i class="g">🟢 أرفع الأخضر: صحيح</i></div>' },
+    { title:'ماذا سنتعلم اليوم؟', html:'<div class="goals"><div><b>١</b><span>استخدام حلقة <b>for</b> للتكرار</span></div><div><b>٢</b><span>كتابة المسافة البادئة في الحلقات</span></div><div><b>٣</b><span>كتابة دالة النطاق <b>range()</b> في الحلقات</span></div></div>' }
+  );
+  if (st.id === 'learn1') st.items.splice(3, 0, { title:'مثال من الواقع: وميض لمبة ESP32 خمس مرات',
+    html:'<p>لوحة <b>ESP32</b> فيها لمبة. نريدها أن تومض <b>٥ مرات</b>.</p><div class="cmp"><div class="bad"><h4>✖ بدون for: ٢٠ سطرًا</h4><pre>led.on()\nsleep(0.5)\nled.off()\nsleep(0.5)\n\nled.on()\nsleep(0.5)\nled.off()\nsleep(0.5)\n\n... (وتتكرر ٥ مرات)</pre></div><div class="good"><h4>✔ مع for: ٥ أسطر فقط</h4><pre>for i in range(5):\n    led.on()\n    sleep(0.5)\n    led.off()\n    sleep(0.5)</pre></div></div>',
+    note:'لو أردناها ١٠٠ مرة: نغيّر الرقم فقط إلى range(100).' });
+});
+
+root.LESSON = lesson; root.TL = tl; root.TPR = tpr;
+root.SECTIONS = [
+  { id:'A', title:'شرح الدرس', sub:'من الفكرة إلى range', stations: lesson },
+  { id:'B', title:'طريق إشارات المرور', sub:'SHOW ← OPINION ← MOVE', stations: tl },
+  { id:'C', title:'محطات الاستجابة الحركية', sub:'THINK ← CHOOSE ← MOVE ← SHOW', stations: tpr },
+  { id:'D', title:'الختام', sub:'ملخص وسؤالا الخروج', stations: [exitSt] }
+];
+root.EXIT = [
+  { code:'for i in range(0, 10, 2):\n    print(i)', q:'كم رقمًا يطبع هذا الكود؟', ans:'5 أرقام (0 2 4 6 8)' },
+  { code:'for i in range(4, 0, -1):\n    print(i)', q:'ماذا يطبع هذا الكود؟', ans:'4 3 2 1' }
+];
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+const PY = window.PY;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const TOK = /(\d+(?: ، \d+)+|range\([^)]*\)|print\([^)]*\)|i = i \+ 1|\bfor\b|\bcounter\b)/g;
+const fmt = s => String(s).split(TOK).map((p, i) => i % 2 ? `<bdi class="c">${esc(p.replace(/ ، /g, ', '))}</bdi>` : esc(p)).join('');
+
+/* ---------- الرسوم ---------- */
+const C = { g:'#12a150', y:'#e89b00', r:'#d8343a', blue:'#2750d8' };
+function limb(pts, col, w){ return `<path d="${pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ')}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`; }
+const hand = p => `<circle cx="${p[0]}" cy="${p[1]}" r="5.6" fill="#f6c9a0"/>`;
+const arms = (L,R,d) => limb(L,d,9)+limb(R,d,9)+hand(L[L.length-1])+hand(R[R.length-1]);
+function fig(pose, o = {}) {
+  const scarf = o.scarf || '#2750d8', dress = o.dress || '#6d4fc7', size = o.size || 80, L0 = [40,70], R0 = [80,70];
+  let a = '', over = '', cls = '';
+  const rest = () => arms([L0,[30,98],[32,126]],[R0,[90,98],[88,126]],dress);
+  switch (pose) {
+    case 'A': case 'up': a = arms([L0,[26,42],[24,14]],[R0,[94,42],[96,14]],dress); break;
+    case 'B': a = arms([L0,[22,90],[38,64]],[R0,[98,90],[82,64]],dress); break;
+    case 'C': a = arms([L0,[50,100],[84,86]],[R0,[70,100],[36,86]],dress); break;
+    case 'D': case 'spin': a = `<path d="M40 70 Q14 104 60 126 Q106 104 80 70" fill="none" stroke="${dress}" stroke-width="9" stroke-linecap="round"/>`+hand([60,126])+(pose==='spin'?`<g class="spn"><circle cx="60" cy="102" r="30" fill="none" stroke="${C.g}" stroke-width="3" stroke-dasharray="10 8"/></g>`:''); break;
+    case 'thumbup': case 'thumbside': case 'thumbdown': case 'say': {
+      const em = o.emoji || (pose==='thumbup'?'👍':pose==='thumbside'?'👉':pose==='thumbdown'?'👎':'✋');
+      a = arms([L0,[30,98],[32,126]],[R0,[100,86],[96,60]],dress);
+      over = `<text x="98" y="52" font-size="30" text-anchor="middle" class="em">${em}</text>`; break; }
+    case 'chin': a = arms([L0,[30,98],[32,126]],[R0,[92,96],[68,58]],dress); over = `<text x="98" y="30" font-size="22" text-anchor="middle" class="em">🤔</text>`; break;
+    case 'fwd': a = rest(); over = `<path d="M60 4 L78 24 L66 24 L66 40 L54 40 L54 24 L42 24 Z" fill="${C.g}" class="au"/>`; break;
+    case 'back': a = rest(); over = `<path d="M60 40 L78 20 L66 20 L66 4 L54 4 L54 20 L42 20 Z" transform="rotate(180 60 22)" fill="${C.r}" class="ad"/>`; break;
+    case 'freeze': a = arms([L0,[24,96],[26,124]],[R0,[96,96],[94,124]],dress); over = `<text x="18" y="30" font-size="20" class="em">❄️</text><text x="100" y="22" font-size="18" class="em">❄️</text>`; break;
+    default: a = rest();
+  }
+  return `<svg class="fig ${cls}" viewBox="0 0 120 160" width="${size*0.75}" height="${size}" aria-hidden="true">
+   <ellipse cx="60" cy="154" rx="28" ry="4.5" fill="rgba(0,0,0,.12)"/>
+   <rect x="46" y="128" width="9" height="24" rx="4" fill="#3a3f55"/><rect x="65" y="128" width="9" height="24" rx="4" fill="#3a3f55"/>
+   <path d="M38 66 Q60 58 82 66 L94 134 Q60 142 26 134 Z" fill="${dress}"/>
+   <path d="M44 70 Q60 80 76 70" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/>${a}
+   <circle cx="60" cy="36" r="27" fill="${scarf}"/><path d="M33 40 Q60 92 87 40 Q60 62 33 40Z" fill="${scarf}"/>
+   <ellipse cx="60" cy="38" rx="17" ry="19" fill="#f6c9a0"/>
+   <circle cx="53" cy="36" r="2.3" fill="#2b2b3a"/><circle cx="67" cy="36" r="2.3" fill="#2b2b3a"/>
+   <path d="M53 46 Q60 52 67 46" fill="none" stroke="#b3475e" stroke-width="2.2" stroke-linecap="round"/>
+   <circle cx="48" cy="43" r="3" fill="#f7a8a8" opacity=".7"/><circle cx="72" cy="43" r="3" fill="#f7a8a8" opacity=".7"/>${over}</svg>`;
+}
+function lightSvg(w = 56) {
+  return `<svg viewBox="0 0 60 150" width="${w}" height="${w*2.5}" aria-hidden="true"><rect x="6" y="2" width="48" height="146" rx="16" fill="#0a1330"/><circle cx="30" cy="30" r="15" fill="${C.r}"/><circle cx="30" cy="75" r="15" fill="${C.y}"/><circle cx="30" cy="120" r="15" fill="${C.g}"/></svg>`;
+}
+const snake = `<svg class="snake" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3c-5 0-6 2-6 4v3h7v1H7c-3 0-4 3-4 6s1 6 4 6h2v-4c0-2 2-4 4-4h6c2 0 3-1 3-3V7c0-2-2-4-6-4Z" fill="#4b8bbe"/><path d="M16 29c5 0 6-2 6-4v-3h-7v-1h10c3 0 4-3 4-6s-1-6-4-6h-2v4c0 2-2 4-4 4h-6c-2 0-3 1-3 3v5c0 2 2 4 6 4Z" fill="#ffd43b"/></svg>`;
+
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+function figAnim(pose, o = {}) { const sz = o.size || 100; return `<div class="flip" style="width:${sz*.75}px;height:${sz}px">${fig('rest', o)}${fig(pose, o)}</div>`; }
+function toast(msg) { const t = $('#toast'); if (!t) return; t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2800); }
+const RANKS = [[0,'متدرّبة على الطريق'],[10,'سائقة مبتدئة'],[25,'سائقة ماهرة'],[50,'قائدة الطريق'],[73,'خبيرة الحلقات']];
+const rankOf = n => RANKS.filter(r => n >= r[0]).pop()[1];
+/* ---------- الصوت والتأثيرات ---------- */
+let muted = false, AC;
+function beep(f = 660, d = .12, t = 'sine') { if (muted) return; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(); o.type = t; o.frequency.value = f; g.gain.value = .07; o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + d); } catch (e) {} }
+function confetti(n = 26) { if (matchMedia('(prefers-reduced-motion:reduce)').matches) return; const cols = [C.g, C.y, C.r, C.blue]; for (let i = 0; i < n; i++) { const s = document.createElement('i'); s.className = 'cf'; s.style.right = Math.random()*100 + 'vw'; s.style.background = cols[i % 4]; s.style.animationDuration = (1.5 + Math.random()*1.5) + 's'; s.style.animationDelay = Math.random()*.3 + 's'; s.style.borderRadius = Math.random() > .5 ? '50%' : '3px'; document.body.appendChild(s); setTimeout(() => s.remove(), 3500); } }
+function countdown(cb) { const ov = $('#ov'); ov.classList.add('on'); const seq = ['3','2','1','ارفعن!']; let i = 0; (function step() { ov.innerHTML = `<div class="num" style="${i===3?'font-size:min(20vw,150px)':''}">${seq[i]}</div>`; beep(i===3?880:520,.18); if (++i < seq.length) setTimeout(step, 760); else setTimeout(() => { ov.classList.remove('on'); if (cb) cb(); }, 900); })(); }
+
+/* ---------- التقدم ---------- */
+const KEY = 'loops-for-range-v3';
+let SAVE = { solved: {}, scores: {} };
+try { const r = localStorage.getItem(KEY); if (r) SAVE = Object.assign(SAVE, JSON.parse(r)); } catch (e) {}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch (e) {} };
+const ALL = window.SECTIONS.flatMap(s => s.stations);
+const labIds = st => [...st.items.map((it, i) => it.lab ? st.id + '-' + i : null).filter(Boolean), st.id + '-ch'];
+const TOTAL = ALL.reduce((n, st) => n + labIds(st).length, 0);
+const solvedCount = () => Object.keys(SAVE.solved).length;
+function updateProg() { const n = solvedCount(); const t = $('#progTxt'), b = $('#progBar'), c = $('#progCar'); if (t) t.textContent = `${n} من ${TOTAL} مختبر`; if (b) b.style.width = (n / TOTAL * 100) + '%'; if (c) c.style.right = `calc(${n / TOTAL * 100}% - 9px)`; const rk = $('#rank'); if (rk) rk.textContent = rankOf(n); }
+
+/* ---------- حالة الصفحة ---------- */
+const S = { st: null, i: 0, pick: null, conf: null, rev: false, tally: {}, streak: 0, t: { stage:0, ev:0, pass:1, timer:0, conf:{} } };
+const LAB = {};
+const labState = (id, lab) => LAB[id] || (LAB[id] = { code: lab.starter, attempts: 0, shown: false, last: null, fb: '', err: 0 });
+
+/* ---------- خيارات الاستجابة ---------- */
+const POSES = {
+  thumb: [['up','thumbup','أوافق / صحيح'],['side','thumbside','غير متأكدة / أحتاج دليلًا'],['down','thumbdown','لا أوافق / خطأ']],
+  step: [['fwd','fwd','خطوة للأمام: نعم / يحدث'],['back','back','خطوة للخلف: لا / لا يحدث'],['freeze','freeze','ثبات: غير متأكدة / أحتاج معلومات']],
+  acq: [['agree','say','أوافق','👍'],['chal','say','عندي اعتراض','✋'],['ques','say','عندي سؤال','🤔']]
+};
+const ABCD = { A:'اليدان فوق الرأس', B:'لمس الكتفين', C:'الذراعان متقاطعتان', D:'دائرة باليدين' };
+function modeOf(st, it) { return st.kind === 'speed' ? it.mode : st.kind; }
+function optsFor(st, it) {
+  const k = modeOf(st, it);
+  if (k === 'tl-show' || k === 'tl-opinion') return ['g','y','r'].map(c => ({ id:c, cls:c, label:st.legend[c], vis:`<span class="sym">${c==='g'?'✔':c==='y'?'؟':'✖'}</span>` }));
+  if (k === 'tl-move') return ['g','y','r'].map((c,n) => ({ id:c, cls:c, label:st.legend[c], sub:st.moves[c], vis:fig(['A','chin','C'][n], { size:78 }) }));
+  if (k === 'thumb' || k === 'step') return POSES[k].map(p => ({ id:p[0], label:p[2], vis:fig(p[1], { size:80 }) }));
+  if (k === 'acq') return POSES.acq.map(p => ({ id:p[0], label:p[2], vis:fig('say', { size:80, emoji:p[3] }) }));
+  if (k === 'abcd') return ['A','B','C','D'].map((l, n) => ({ id:l, txt:true, letter:l, label:it.o[n], sub:ABCD[l], vis:fig(l, { size:70 }) }));
+  if (k === 'conf') return ['A','B','C','D'].map((l, n) => ({ id:l, txt:true, letter:l, label:it.o[n], vis:'' }));
+  return [];
+}
+const optLabel = o => o ? (o.letter ? `${o.letter}: ${o.label}` : o.label) : '';
+
+/* ---------- المحرر ---------- */
+function highlight(src) {
+  const re = /(#[^\n]*)|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?)|\b(for|in)\b|\b(print|range|str|int|len|abs)\b|(\b\d+\b)/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) { out += esc(src.slice(last, m.index)); const c = m[1] ? 'c' : m[2] ? 's' : m[3] ? 'k' : m[4] ? 'f' : 'n'; out += `<span class="t-${c}">${esc(m[0])}</span>`; last = re.lastIndex; }
+  return out + esc(src.slice(last));
+}
+const codeBlock = src => `<pre class="code" dir="ltr">${highlight(src)}</pre>`;
+const outBlock = (lines, hi, anim, gap) => `<div class="outv${anim ? ' anim' : ''}" dir="ltr">${lines.length ? lines.map((l, i) => `<div class="ln${hi === i ? ' diff' : ''}" ${anim ? `style="animation-delay:${Math.round(i * (gap || 90) + 120)}ms"` : ''}>${esc(l) || '&nbsp;'}</div>`).join('') : '<div class="ln muted">(لا مخرجات)</div>'}</div>`;
+
+const SNIP = [['for i in range(|):\n    ', 'for', 'حلقة for كاملة'], ['print(|)', 'print', 'اطبعي'], ['range(|)', 'range', 'نطاق'], ['i', 'i', 'العدّاد'], ['    ', '⇥', 'مسافة بادئة'], ['"|"', '" "', 'نص'], [' * ', '*', 'ضرب'], [' + ', '+', 'جمع']];
+function labHTML(id, lab) {
+  const s = labState(id, lab), done = SAVE.solved[id];
+  return `<section class="lab" id="lab-${id}">
+   <div class="lab-h">${snake}<b>مختبر بايثون</b><span class="muted" style="color:#9fb0d8;font-size:.82rem">for و range فقط</span><span class="stt ${done ? 'ok' : ''}" id="stt-${id}">${done ? (done.star ? '★ تم الحل' : '✔ تم الحل بمساعدة') : 'لم يُحَلّ بعد'}</span></div>
+   <div class="lab-b"><p class="task">${fmt(lab.task)}</p>
+    <div class="lab-g">
+     <div><div class="qk" dir="ltr">${SNIP.map((x,k)=>`<button type="button" class="qb" data-a="ins" data-v="${id}|${k}" title="${x[2]}">${esc(x[0])}</button>`).join("")}</div><div class="ed"><div class="gut"></div><div class="wrap"><pre class="hl" aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="محرر بايثون" dir="ltr"></textarea></div></div>
+      <div class="tools" style="margin-top:12px">
+       <button class="btn sm go" data-a="run" data-v="${id}">▶ تشغيل</button>
+       <button class="btn sm" data-a="check" data-v="${id}">✔ تحقق من الحل</button>
+       <button class="btn sm ghost" data-a="hint" data-v="${id}">💡 تلميح</button>
+       <button class="btn sm ghost" data-a="reset" data-v="${id}">↺ إعادة</button>
+       <button class="btn sm ghost" data-a="sol" data-v="${id}" id="solbtn-${id}" ${s.attempts || done ? '' : 'disabled'} title="جرّبي التحقق أولًا">👁 عرض الحل</button>
+      </div></div>
+     <div class="side">
+      <div class="box exp"><div class="lbl">المخرجات المطلوبة</div>${outBlock(lab.expect)}</div>
+      <div class="box con" id="con-${id}"><div class="lbl">نتيجة التشغيل</div><div id="conb-${id}">${s.conHTML || '<span style="color:#7f8db3">اضغطي «تشغيل» لترى المخرجات هنا</span>'}</div></div>
+     </div></div>
+    <div id="fb-${id}">${s.fb || ''}</div>
+    <div id="sol-${id}">${s.shown ? solHTML(id, lab) : ''}</div>
+   </div></section>`;
+}
+const solHTML = (id, lab) => `<div class="sol"><b>الحل النموذجي</b>${codeBlock(lab.solution)}<p>${fmt(lab.why)}</p><div class="tools" style="margin-top:8px"><button class="btn sm ghost" data-a="usesol" data-v="${id}">انسخيه إلى المحرر وشغّليه</button></div></div>`;
+
+function initLab(id, lab) {
+  const root = $('#lab-' + id); if (!root) return;
+  const ta = root.querySelector('textarea'), hl = root.querySelector('.hl'), gut = root.querySelector('.gut'), s = labState(id, lab);
+  ta.value = s.code;
+  const sync = () => {
+    s.code = ta.value; hl.innerHTML = highlight(ta.value) + '\n ';
+    const n = ta.value.split('\n').length;
+    gut.innerHTML = Array.from({ length:n }, (_, k) => `<i class="${s.err === k + 1 ? 'bad' : ''}">${k + 1}</i>`).join('');
+    ta.style.height = 'auto'; ta.style.height = Math.max(ta.scrollHeight, 168) + 'px';
+  };
+  ta.addEventListener('input', () => { s.err = 0; sync(); });
+  ta.addEventListener('scroll', () => { hl.scrollLeft = ta.scrollLeft; });
+  ta.addEventListener('keydown', e => {
+    const pr = { '(': ')', '"': '"', "'": "'" };
+    if ((e.key === ')' || e.key === '"' || e.key === "'") && ta.value[ta.selectionStart] === e.key) { e.preventDefault(); ta.setSelectionRange(ta.selectionStart + 1, ta.selectionStart + 1); return; }
+    if (pr[e.key] && !e.ctrlKey && !e.metaKey) { e.preventDefault(); const a = ta.selectionStart, b = ta.selectionEnd; ta.setRangeText(e.key + ta.value.slice(a, b) + pr[e.key], a, b, 'end'); ta.setSelectionRange(a + 1 + (b - a), a + 1 + (b - a)); if (a === b) ta.setSelectionRange(a + 1, a + 1); sync(); return; }
+    if (e.key === 'Tab') { e.preventDefault(); const a = ta.selectionStart, b = ta.selectionEnd; ta.setRangeText('    ', a, b, 'end'); sync(); }
+    else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault(); const a = ta.selectionStart, before = ta.value.slice(0, a), line = before.slice(before.lastIndexOf('\n') + 1);
+      let ind = line.match(/^ */)[0]; if (/:\s*$/.test(line.replace(/#.*$/, ''))) ind += '    ';
+      ta.setRangeText('\n' + ind, a, ta.selectionEnd, 'end'); sync();
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); A.run(id); }
+  });
+  sync(); window.__labSync = sync;
+  s.sync = sync;
+}
+function conHTML(r, id) {
+  if (r.err) {
+    return `<div class="err"><b>${esc(r.err.kind)}</b> في السطر ${r.err.line}<br><code>${esc(r.err.msg)}</code><p>${esc(PY.friendly(r.err))}</p></div>`;
+  }
+  const tr = r.trace && r.trace.length, gap = tr && r.trace.length === r.lines.length ? 420 : 90;
+  let h = outBlock(r.lines, undefined, true, gap);
+  if (tr) {
+    const stop = r.traceRange[1];
+    h += `<div class="trk" id="trk-${id}" dir="ltr"><i class="tcar">🚗</i><div class="nds">${r.trace.map(v => `<span class="nd">${v}</span>`).join('')}${r.traceMore ? '<span class="nd">…</span>' : ''}<span class="nd stop">${stop}</span></div><div class="tcap"><em>${esc(r.traceVar)}</em><span class="tmsg">العدّاد يمرّ بالقيم ثم يتوقف قبل ${stop}</span><button class="rp" data-a="replay" data-v="${id}">↻ أعيدي العرض</button></div></div>`;
+  }
+  return h;
+}
+function playTrack(id) {
+  const t = document.getElementById('trk-' + id); if (!t) return; clearTimeout(t._tm);
+  const nodes = [...t.querySelectorAll('.nd')], car = t.querySelector('.tcar'), msg = t.querySelector('.tmsg'); let k = 0;
+  nodes.forEach(n => n.classList.remove('on', 'past'));
+  const step = () => {
+    const n = nodes[k]; if (!n) return;
+    car.style.transform = `translateX(${n.offsetLeft + n.offsetWidth / 2 - 13}px)`;
+    if (k > 0) nodes[k - 1].classList.replace('on', 'past'); n.classList.add('on');
+    if (n.classList.contains('stop')) { car.textContent = '🛑'; msg.textContent = 'توقّفت: القيمة ' + n.textContent + ' غير مدرجة'; beep(300, .15, 'square'); return; }
+    car.textContent = '🚗'; msg.textContent = 'i = ' + n.textContent; beep(440 + k * 40, .06); k++; t._tm = setTimeout(step, 420);
+  };
+  step();
+}function paintCon(id, r) {
+  const el = $('#conb-' + id), box = $('#con-' + id); if (!el) return;
+  el.innerHTML = conHTML(r, id); box.classList.toggle('bad', !!r.err); if (!r.err) playTrack(id);
+  const s = LAB[id]; s.conHTML = el.innerHTML; s.err = r.err ? r.err.line : 0; if (s.sync) s.sync();
+}
+function findLab(id) { for (const st of ALL) { if (id === st.id + '-ch') return st.challenge; const m = id.match(/^(.*)-(\d+)$/); if (m && m[1] === st.id) return st.items[+m[2]].lab; } }
+
+function evaluate(lab, r) {
+  if (r.err) return { s:'error' };
+  const same = r.lines.length === lab.expect.length && r.lines.every((x, i) => x === lab.expect[i]);
+  if (!same) { let d = r.lines.findIndex((x, i) => x !== lab.expect[i]); if (d < 0) d = Math.min(r.lines.length, lab.expect.length); return { s:'diff', d }; }
+  if (!r.fors.length) return { s:'struct', m:'الناتج صحيح، لكن المطلوب استخدام حلقة for مع range بدل كتابة الأوامر سطرًا سطرًا.' };
+  if (lab.needArgs && !r.fors.some(f => f.argc === lab.needArgs)) return { s:'struct', m:'الناتج صحيح، لكن المطلوب كتابة range بـ ' + ({1:'قيمة واحدة',2:'قيمتين (البداية والنهاية)',3:'ثلاث قيم (البداية والنهاية والخطوة)'})[lab.needArgs] + '.' };
+  if (lab.needVar && !r.fors.some(f => f.v !== 'i')) return { s:'struct', m:'الناتج صحيح، لكن المطلوب تغيير اسم العدّاد إلى اسم آخر غير i.' };
+  if (lab.needFors && r.fors.length < lab.needFors) return { s:'struct', m:'المطلوب كتابة حلقتي for منفصلتين.' };
+  return { s:'ok' };
+}
+
+const A = {
+  ins(v) { const [id, k] = v.split('|'), r = $('#lab-' + id), ta = r && r.querySelector('textarea'); if (!ta) return; const t = SNIP[+k][0], c = t.indexOf('|'), txt = t.replace('|', ''), a = ta.selectionStart; ta.focus(); ta.setRangeText(txt, a, ta.selectionEnd, 'end'); const p = c < 0 ? a + txt.length : a + c; ta.setSelectionRange(p, p); ta.dispatchEvent(new Event('input', { bubbles: true })); beep(600, .04); },
+  replay(id) { playTrack(id); },
+  run(id) { const lab = findLab(id), s = labState(id, lab); const r = PY.runPy(s.code); s.last = r; paintCon(id, r); beep(r.err ? 220 : 560, .12, r.err ? 'sawtooth' : 'sine'); return r; },
+  check(id) {
+    const lab = findLab(id), s = labState(id, lab), r = A.run(id), ev = evaluate(lab, r); s.attempts++;
+    const fbEl = $('#fb-' + id); let h = '';
+    if (ev.s === 'ok') {
+      const star = !s.shown;
+      if (!SAVE.solved[id]) { SAVE.solved[id] = { star }; persist(); confetti(); beep(880, .2, 'triangle'); vib(40); updateProg(); const sc = solvedCount(); if (sc % 10 === 0 || sc === TOTAL) { toast(`🎉 أنجزتِ ${sc} مختبرًا! رتبتك: ${rankOf(sc)}`); confetti(70); } const t = $('#stt-' + id); if (t) { t.className = 'stt ok'; t.textContent = star ? '★ تم الحل' : '✔ تم الحل بمساعدة'; } }
+      h = `<div class="fb ok"><b class="t">أحسنتِ! حلّك صحيح.</b><p>${fmt(lab.why)}</p></div>`;
+    } else if (ev.s === 'error') h = `<div class="fb er"><b class="t">يوجد خطأ يمنع تشغيل الكود</b><p>اقرئي رسالة الخطأ في «نتيجة التشغيل» وصحّحي السطر المظلل بالأحمر ثم أعيدي التحقق.</p></div>`;
+    else if (ev.s === 'diff') {
+      const got = r.lines[ev.d], want = lab.expect[ev.d];
+      let msg = got === undefined ? 'الناتج أقصر من المطلوب: ينقصه أسطر.' : want === undefined ? 'ظهرت أسطر زائدة عن المطلوب.' : `الفرق الأول في السطر ${ev.d + 1}: ظهر «${esc(got)}» والمطلوب «${esc(want)}».`;
+      h = `<div class="fb no"><b class="t">قريبة! لكن الناتج يختلف عن المطلوب.</b><p>${msg}</p><div class="cmp"><div><div class="lbl muted">ناتجك</div>${outBlock(r.lines, ev.d)}</div><div><div class="lbl muted">المطلوب</div>${outBlock(lab.expect, ev.d)}</div></div><p class="muted" style="margin-top:6px">جرّبي زر «تلميح» إن احتجتِ.</p></div>`;
+    } else h = `<div class="fb no"><b class="t">قريبة جدًا!</b><p>${esc(ev.m)}</p></div>`;
+    s.fb = h; fbEl.innerHTML = h; const b = $('#solbtn-' + id); if (b) b.disabled = false;
+    if (ev.s !== 'ok') { beep(300, .18, 'sawtooth'); vib([60, 40, 60]); const lb = $('#lab-' + id); if (lb) { lb.classList.remove('shake'); void lb.offsetWidth; lb.classList.add('shake'); } }
+  },
+  hint(id) { const lab = findLab(id), s = labState(id, lab); s.fb = `<div class="fb no"><b class="t">💡 تلميح</b><p>${fmt(lab.hint)}</p></div>`; $('#fb-' + id).innerHTML = s.fb; },
+  reset(id) { const lab = findLab(id), s = labState(id, lab); s.code = lab.starter; s.conHTML = ''; s.fb = ''; s.err = 0; $('#lab-' + id).querySelector('textarea').value = lab.starter; s.sync(); $('#conb-' + id).innerHTML = '<span style="color:#7f8db3">اضغطي «تشغيل» لترى المخرجات هنا</span>'; $('#con-' + id).classList.remove('bad'); $('#fb-' + id).innerHTML = ''; },
+  sol(id) { const lab = findLab(id), s = labState(id, lab); s.shown = true; $('#sol-' + id).innerHTML = solHTML(id, lab); },
+  usesol(id) { const lab = findLab(id), s = labState(id, lab); s.code = lab.solution; $('#lab-' + id).querySelector('textarea').value = lab.solution; s.sync(); A.run(id); $('#lab-' + id).scrollIntoView({ behavior:'smooth', block:'start' }); },
+
+  /* التنقل */
+  home() { S.st = null; render(); go('home'); window.scrollTo(0, 0); },
+  open(id) { S.st = ALL.find(s => s.id === id); S.i = startIdx(S.st); reset(); render(); go(id); window.scrollTo(0, 0); },
+  goto(i) { S.i = +i; reset(); render(); window.scrollTo(0, 0); },
+  next() { S.i++; reset(); render(); if (S.i > S.st.items.length) { confetti(50); beep(880, .25, 'triangle'); } window.scrollTo(0, 0); },
+  prev() { if (S.i > startIdx(S.st)) { S.i--; reset(); render(); window.scrollTo(0, 0); } },
+  nextst() { const n = ALL[ALL.indexOf(S.st) + 1]; if (n) A.open(n.id); else A.home(); },
+  pick(id) { if (S.rev) return; const st = S.st, it = S.st.items[S.i]; S.pick = id; beep(520, .08);
+    if (modeOf(st, it) === 'conf') { render(); return; }
+    A.reveal(); },
+  setconf(n) { S.conf = +n; A.reveal(); },
+  reveal() { const st = S.st, it = st.items[S.i]; S.rev = true;
+    if (it.ans && S.pick && !it.evidence && it.ans !== 'spin') { const ok = S.pick === it.ans; const k = st.id + '-' + S.i; SAVE.scores[k] = ok; persist(); if (ok) { S.streak++; confetti(16); beep(740, .14); vib(30); if (S.streak >= 3) toast(`🔥 ${S.streak} إجابات صحيحة متتالية!`); } else { S.streak = 0; beep(220, .22, 'sawtooth'); vib([60, 40, 60]); } }
+    render(); },
+  reshow() { S.rev = true; render(); },
+  tally(v) { const [k, c, d] = v.split('|'); const o = S.tally[k] || (S.tally[k] = { g:0, y:0, r:0 }); o[c] = Math.max(0, o[c] + +d); render(); },
+  count() { countdown(); },
+  begin() { S.i = 0; reset(); render(); window.scrollTo(0, 0); },
+  think() { const T = S.t, st = S.st, secs = st.kind === 'speed' ? 5 : 8;
+    if (T.timer) { clearTimeout(window._tm); clearInterval(window._ti); T.timer = 0; T.stage = 1; render(); return; }
+    T.timer = 1; render(); let n = secs; const tn = $('#tnum'); if (tn) tn.textContent = n;
+    window._ti = setInterval(() => { n--; const e = $('#tnum'); if (e) e.textContent = Math.max(n, 0); beep(400, .04); }, 1000);
+    window._tm = setTimeout(() => { clearInterval(window._ti); if (S.t.timer) { S.t.timer = 0; S.t.stage = 1; beep(660, .2); render(); } }, secs * 1000); },
+  tstage(n) { S.t.stage = +n; render(); },
+  show(again) { countdown(() => { if (again === 'again') S.t.ev = 2; S.t.stage = 3; render(); if (again !== 'again') confetti(10); }); },
+  evidence() { S.t.ev = 1; render(); },
+  tconf(v) { const [k, n] = v.split('|'); S.t.conf[k] = +n; beep(500 + n * 60, .1); render(); },
+  repeat() { S.t.pass = 2; S.t.stage = 0; S.t.timer = 0; render(); },
+  guide() { $('#modal').innerHTML = `<div class="card"><h2>💡 دليل المعلمة السريع</h2>
+   <h3 style="margin-top:12px">شرح الدرس</h3><ul><li>كل محطة شرح تنتهي بمختبر بايثون: تكتب الطالبة الكود وتشغّله وتتحقق من حلها بنفسها.</li><li>في أسئلة «توقّعي الناتج» اكتمي الحل أولًا ثم اضغطي «اكشفي الناتج» بعد أن تكتب الطالبات توقعهن.</li></ul>
+   <h3 style="margin-top:12px">🚦 إشارة المرور</h3><ul><li><b>SHOW:</b> 🟢 صحيحة · 🟡 جزئيًا / تحتاج تعديل · 🔴 غير صحيحة.</li><li><b>OPINION:</b> 🟢 أوافق · 🟡 غير متأكدة · 🔴 لا أوافق. اطلبي دليلًا من الدرس ولا تصحّحي مباشرة.</li><li><b>MOVE:</b> 🟢 صفّقي · 🟡 يد على الذقن · 🔴 ذراعان متقاطعتان.</li></ul>
+   <h3 style="margin-top:12px">🙌 الاستجابة الحركية</h3><ul><li>الإيقاع: فكّري ← اختاري ← تحرّكي ← اكشفي معًا بعد العدّ «٣…٢…١».</li><li>زر «٣…٢…١» يعرض العدّ التنازلي على الشاشة؛ ثم اضغطي «اكشفي الحل».</li></ul>
+   <h3 style="margin-top:12px">المحرر</h3><ul><li>يقتصر على for و range و print. Tab يضيف مسافة بادئة، وCtrl + Enter يشغّل الكود.</li><li>زر «عرض الحل» يفتح بعد أول محاولة تحقق، والحل بمساعدة لا يمنح نجمة.</li></ul>
+   <div class="actions"><span></span><button class="btn" data-a="close">فهمت ✔</button></div></div>`; $('#modal').classList.add('on'); },
+  close() { $('#modal').classList.remove('on'); },
+  mute(v, b) { muted = !muted; b.textContent = muted ? '🔇' : '🔊'; }
+};
+function reset() { clearTimeout(window._tm); clearInterval(window._ti); S.pick = null; S.conf = null; S.rev = false; S.t = { stage:0, ev:0, pass:1, timer:0, conf:{} }; }
+const startIdx = st => st.kind === 'lesson' ? 0 : -1;
+document.addEventListener('click', e => {
+  if (e.target === $('#modal')) return A.close();
+  const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
+  const f = A[b.dataset.a]; if (f) f(b.dataset.v, b);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') A.close(); });
+
+/* ---------- العرض ---------- */
+const bar = () => `<header class="bar"><div class="bar-in"><button class="logo" data-a="home" aria-label="الرئيسية">
+  <svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="5" r="4.5" fill="${C.r}"/><circle cx="15" cy="15" r="4.5" fill="${C.y}"/><circle cx="15" cy="25" r="4.5" fill="${C.g}"/></svg>
+  <span>حلقة for ودالة range<small>الوحدة الثالثة: البرمجة مع بايثون · الدرس الخامس</small></span></button>
+  <div class="prog"><span id="progTxt"></span><span class="track"><i id="progBar"></i><b id="progCar" class="pcar">🚗</b></span></div>
+  <button class="tb" data-a="guide">دليل المعلمة</button><button class="tb" data-a="mute">${muted ? '🔇' : '🔊'}</button></div></header>`;
+
+
+/* ---------- المحطات الحركية: THINK ← CHOOSE ← MOVE ← SHOW ---------- */
+const TPRK = ['thumb','abcd','step','acq','conf','speed'];
+const ICON = { thumb:'👍', abcd:'🙆‍♀️', step:'🚶‍♀️', acq:'💬', conf:'🖐️', speed:'⚡' };
+const LEG = {
+  thumb:[['up','👍','أوافق / صحيح'],['side','👉','غير متأكدة / أحتاج دليلًا'],['down','👎','لا أوافق / خطأ']],
+  abcd:[['A','A','اليدان فوق الرأس'],['B','B','لمس الكتفين'],['C','C','الذراعان متقاطعتان'],['D','D','دائرة باليدين']],
+  step:[['fwd','⬆️','خطوة للأمام: نعم / يحدث / ينتمي'],['back','⬇️','خطوة للخلف: لا / لا يحدث / لا ينتمي'],['freeze','🧊','ثبات: غير متأكدة / أحتاج معلومات']],
+  acq:[['agree','👍','أوافق'],['chal','✋','عندي اعتراض'],['ques','🤔','عندي سؤال']],
+  spin:[['spin','🔄','لفّ اليدين = تستمر الحلقة'],['C','🛑','ذراعان متقاطعتان = تتوقف']]
+};
+LEG.conf = LEG.abcd;
+function poseFor(mode, v) {
+  const m = { thumb:{ up:'thumbup', side:'thumbside', down:'thumbdown' }, step:{ fwd:'fwd', back:'back', freeze:'freeze' }, acq:{ agree:'thumbup', chal:'say', ques:'chin' } };
+  if (mode === 'abcd' || mode === 'conf') return v; if (mode === 'spin') return 'spin'; return m[mode][v];
+}
+function legendFigs(mode) {
+  const sc = ['#2750d8','#e0527a','#12203f','#2e9d8f'], dr = ['#6d4fc7','#2e9d8f','#ee8a2b','#d64b5f'];
+  return `<div class="mini">${LEG[mode].map((l, k) => `<div class="it">${figAnim(poseFor(mode, l[0]), { size:104, scarf:sc[k % 4], dress:dr[k % 4] })}<b class="${/[A-D]/.test(l[1]) ? 'en' : ''}" style="font-size:1.1rem">${l[1]}</b><span>${l[2]}</span></div>`).join('')}</div>`;
+}
+function handN(n, size) {
+  size = size || 56; let f = ''; const xs = [18,30,42,54], hs = [34,42,44,38];
+  for (let i = 0; i < Math.min(n, 4); i++) f += `<rect x="${xs[i]}" y="${52 - hs[i]}" width="9" height="${hs[i] + 8}" rx="4.5" fill="#f6c9a0" stroke="#d9a678" stroke-width="1"/>`;
+  if (n === 5) f += `<rect x="4" y="38" width="10" height="26" rx="5" fill="#f6c9a0" stroke="#d9a678" stroke-width="1" transform="rotate(-38 9 51)"/>`;
+  return `<svg viewBox="0 0 74 84" width="${size}" height="${size * 84 / 74}" aria-hidden="true">${f}<rect x="12" y="44" width="52" height="34" rx="14" fill="#f6c9a0" stroke="#d9a678" stroke-width="1"/><text x="38" y="68" font-size="20" font-weight="800" text-anchor="middle" fill="#12203f" font-family="Arial,sans-serif">${n}</text></svg>`;
+}
+function lightOn(on, w = 56) {
+  const c = (k, cy) => `<circle cx="30" cy="${cy}" r="14" fill="${on === k ? C[k] : '#3b4258'}" ${on === k ? `filter="url(#gl${k})"` : ''} stroke="#171b2a" stroke-width="2"/>`;
+  return `<svg viewBox="0 0 60 130" width="${w}" height="${w * 130 / 60}" aria-hidden="true"><defs>${['g','y','r'].map(k => `<filter id="gl${k}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`).join('')}</defs><rect x="26" y="108" width="8" height="22" fill="#2b3147"/><rect x="4" y="2" width="52" height="108" rx="16" fill="#252b3f" stroke="#171b2a" stroke-width="2"/>${c('r', 24)}${c('y', 56)}${c('g', 88)}</svg>`;
+}
+function ansLabel(it, mode, ans) {
+  if (mode === 'thumb') return { up:'👍 أوافق / صحيح', side:'👉 غير متأكدة / أحتاج دليلًا', down:'👎 لا أوافق / خطأ' }[ans];
+  if (mode === 'step') return { fwd:'⬆️ خطوة للأمام', back:'⬇️ خطوة للخلف', freeze:'🧊 ثبات (Freeze)' }[ans];
+  if (mode === 'acq') return { agree:'👍 أوافق', chal:'✋ عندي اعتراض', ques:'🤔 عندي سؤال' }[ans];
+  if (mode === 'spin') return '🔄 تستمر … ثم 🛑 نوقفها';
+  return `<span class="en">${ans}</span> — ${esc(it.o['ABCD'.indexOf(ans)])}`;
+}
+const tprCanNext = (st, it) => !(it.evidence && S.t.ev !== 2) && !(it.repeat && S.t.pass === 1);
+function tprPage(st, it) {
+  const T = S.t, mode = modeOf(st, it), n = st.items.length, labels = ['THINK','CHOOSE','MOVE','SHOW'];
+  let body = `<div class="qhead"><span class="pill en">${st.kind === 'speed' ? it.label.split(' · ')[0] : st.en}</span>${st.kind === 'speed' ? `<b>${it.label.split(' · ')[1]}</b>` : ''}${it.type ? `<span class="pill">${it.type}</span>` : ''}<span class="pill">السؤال ${S.i + 1} من ${n}${T.pass === 2 ? ' · المحاولة الثانية' : ''}</span></div>
+   <div class="steps">${labels.map((l, k) => `<span class="stp ${k < T.stage ? 'done' : k === T.stage ? 'on' : ''}">${l}</span>`).join('')}</div>
+   <p class="stmt">${fmt(it.q)}</p>${it.code ? codeBlock(it.code) : ''}`;
+  if (it.o) body += `<div class="optsl">${it.o.map((o, k) => { const L = 'ABCD'[k]; return `<div class="opt ${T.stage === 3 && L === it.ans ? 'right' : ''}"><span class="L">${L}</span><span>${fmt(o)}</span></div>`; }).join('')}</div>`;
+  if (T.stage === 0) body += `<div class="ring">${T.timer ? `<svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="fg" cx="50" cy="50" r="42" style="animation-duration:${st.kind === 'speed' ? 5 : 8}s"/></svg><b id="tnum"></b>` : '<span class="bigemoji">🧠</span>'}</div>
+    <div class="banner">فكّري بصمت… لا تكشفي إجابتك!</div><div class="actions"><span></span><button class="btn" data-a="think">${T.timer ? '⏭ تخطّي' : '⏱ ابدئي التفكير'}</button></div>`;
+  if (T.stage === 1) body += `<div class="banner">🤫 اختاري إجابتك الآن <b>بدون أن تكشفيها</b></div><div class="actions"><span></span><button class="btn" data-a="tstage" data-v="2">اخترتُ ✔</button></div>`;
+  if (T.stage === 2) body += `<div class="banner">🏃‍♀️ جهّزي حركتك الآن…</div>${legendFigs(mode)}<div class="actions"><span></span><button class="btn go" data-a="show">3…2…1… SHOW!</button></div>`;
+  if (T.stage === 3) body += tprReveal(st, it, mode);
+  return `<article class="card">${body}</article>${T.stage === 3 && tprCanNext(st, it) && it.lab ? labHTML(st.id + '-' + S.i, it.lab) : ''}`;
+}
+function tprReveal(st, it, mode) {
+  const T = S.t; let ans = it.ans, why = it.why, extra = '';
+  if (it.evidence) {
+    if (T.ev === 0) { extra = `<button class="btn sm" data-a="evidence">📖 اعرضي الدليل ثم أعيدي التفكير</button>`; why = 'إجابتكن الآن: 👉 «أحتاج دليلًا». هل هناك دليل في الدرس يحسم الأمر؟'; }
+    else if (T.ev === 2) ans = it.after;
+    else { ans = 'side'; extra = `<button class="btn go" data-a="show" data-v="again">3…2…1… SHOW again!</button>`; }
+  }
+  const sc = '#e0527a', dr = '#2e9d8f';
+  const showFig = mode === 'spin' ? fig('spin', { size:120 }) + fig('C', { size:120, scarf:sc }) : fig(poseFor(mode, ans), { size:130, scarf:sc, dress:dr });
+  const letter = (mode === 'abcd' || mode === 'conf') ? `<div class="en" style="font-size:4rem;color:var(--go)">${ans}</div>` : '';
+  let conf = '';
+  if (st.kind === 'conf' || (st.kind === 'speed' && mode === 'conf')) {
+    const key = st.id + S.i + '-' + T.pass, cur = T.conf[key], scale = window.TPR.find(z => z.id === 'conf').scale;
+    conf = `<div style="margin-top:12px"><b>الآن أظهري ثقتك:</b><div class="scale">${scale.map(c => `<div class="sc ${cur === c[0] ? 'pick' : ''}" data-a="tconf" data-v="${key}|${c[0]}" role="button" tabindex="0">${handN(c[0], 50)}<div>${c[1]}</div></div>`).join('')}</div></div>`;
+    if (it.repeat) {
+      const a = T.conf[st.id + S.i + '-1'], b = T.conf[st.id + S.i + '-2'];
+      if (T.pass === 1) { if (a) extra = `<div class="sb h" style="width:100%">${esc(it.explain)}</div><button class="btn sm" data-a="repeat">↻ اسألي السؤال مرة ثانية</button>`; }
+      else if (a && b) conf += `<div class="cmp"><span>قبل: ${handN(a, 40)}</span><span>←</span><span>بعد: ${handN(b, 40)}</span><b>${b > a ? '📈 ارتفعت ثقتكِ!' : b === a ? 'ثقتكِ ثابتة' : '📉 راجعي فكرتك'}</b></div>`;
+    }
+  }
+  return `<div class="reveal"><div style="text-align:center;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap">${showFig}${letter}</div>
+   <div class="v ok" style="margin-top:6px">${(mode === 'thumb' || mode === 'step' || mode === 'acq') ? '' : '✔ '}الإجابة: ${ansLabel(it, mode, ans)}</div>
+   <div class="sb h">${fmt(why)}</div>
+   ${it.tip ? `<div class="sb">🎤 ${esc(it.tip)}</div>` : ''}${mode === 'acq' ? '<div class="sb">🎤 اطلبي من طالبتين: واحدة 👍 وواحدة ✋ لتبرير الموقف بسبب واحد فقط، ثم اسمحي بتغيير الموقف.</div>' : ''}${mode === 'thumb' && !it.evidence ? '<div class="sb">🎤 اختاري طالبة أو اثنتين لتبرير اختيارهن.</div>' : ''}
+   ${conf}${extra ? `<div class="tools" style="margin-top:10px">${extra}</div>` : ''}</div>`;
+}
+function introPage(st) {
+  if (TPRK.includes(st.kind)) {
+    const k = st.kind, Z = st;
+    return `<article class="card"><div class="qhead"><span class="pill">محطة ${Z.num}</span><span class="en" style="font-size:1.4rem">${Z.en}</span><span class="bigemoji" style="margin-inline-start:auto">${ICON[k]}</span></div>
+     <div class="steps"><span class="stp">THINK</span><span class="stp">CHOOSE</span><span class="stp">MOVE</span><span class="stp">SHOW</span></div>
+     ${k === 'conf' ? `<div class="scale">${Z.scale.map(c => `<div class="sc">${handN(c[0], 52)}<div>${c[1]}</div></div>`).join('')}</div><p class="muted" style="text-align:center">الإجابة أولًا ← ثم ثقتك بأصابعك</p>`
+       : k === 'speed' ? `<p style="text-align:center;font-size:1.25rem;line-height:1.9">٦ تحديات سريعة · ١٠–١٥ ثانية لكل تحدٍّ<br>تتغير طريقة الاستجابة في كل جولة ⚡</p>` : legendFigs(k)}
+     <p class="muted" style="text-align:center">${Z.tag}</p>
+     <div class="actions"><span class="muted">${Z.items.length} ${k === 'speed' ? 'جولات' : 'أسئلة'} + تحدٍّ بايثون</span><button class="btn go" data-a="begin">ابدئي ▶</button></div></article>`;
+  }
+  const L = st.legend;
+  return `<article class="card"><div class="qhead"><span class="pill">محطة ${st.num}</span><span class="en" style="font-size:1.4rem">${st.en}</span><b>· ${st.ar}</b></div><p class="muted">${st.tag}</p>
+   <div class="legend">${['g','y','r'].map(c => `<div class="lg ${c}"><div>${lightOn(c, 50)}</div><b>${L[c]}</b>${st.kind === 'tl-move' ? `<div>${figAnim(c === 'g' ? 'A' : c === 'y' ? 'chin' : 'C', { size:104 })}</div><span>${st.moves[c]}</span>` : `<span>ارفعي بطاقة ${{ g:'الأخضر', y:'الأصفر', r:'الأحمر' }[c]}</span>`}</div>`).join('')}</div>
+   <div class="actions"><span class="muted">${st.items.length} عبارات + تحدٍّ بايثون</span><button class="btn go" data-a="begin">ابدئي المحطة ▶</button></div></article>`;
+}
+function roadHTML(st) {
+  const tl = window.TL, idx = tl.indexOf(st); if (idx < 0) return '';
+  const prog = idx + Math.max(0, S.i) / st.items.length, names = [['SHOW','اللون'],['OPINION','الرأي'],['MOVE','الحركة']];
+  return `<div class="road">${names.map((nm, k) => `<div class="stn ${k < idx ? 'done' : k === idx ? 'on' : ''}" style="right:${88 - k * 38}%"><div class="dot"><span class="en" style="font-size:.6rem">${nm[0]}</span><span>${nm[1]}</span></div></div>`).join('')}<div class="car" style="right:${88 - prog * 38}%">🚗</div></div>`;
+}
+function zonesHTML(st) {
+  if (!TPRK.includes(st.kind)) return '';
+  return `<div class="zones">${window.TPR.map(z => `<span class="zn ${z === st ? 'on' : labIds(z).every(id => SAVE.solved[id]) ? 'done' : ''}">${z.num - 8}. ${z.ar}</span>`).join('')}</div>`;
+}
+
+function stDots(st) { const ids = labIds(st); return `<div class="dots">${ids.map(id => `<i class="${SAVE.solved[id] ? (SAVE.solved[id].star ? 's' : 'd') : ''}"></i>`).join('')}</div>`; }
+function renderHome() {
+  const next = ALL.find(st => labIds(st).some(id => !SAVE.solved[id])) || ALL[0];
+  const sections = window.SECTIONS.map(sec => `<section class="sec"><div class="sec-h"><span class="k">${sec.id}</span><h2>${sec.title}</h2><span class="s">${sec.sub}</span></div>
+   <div class="grid">${sec.stations.map(st => { const ids = labIds(st), d = ids.filter(x => SAVE.solved[x]).length;
+     return `<button class="st" style="--c:${st.color}" data-a="open" data-v="${st.id}"><div class="top"><span class="n">${st.num}</span><div><div class="e en">${st.en}</div><h3>${st.ar}</h3></div></div><p>${st.tag}</p><div class="meta">${stDots(st)}<span>${d} من ${ids.length} مختبر</span></div></button>`; }).join('')}</div></section>`).join('');
+  return `<section class="hero"><div><span class="pill en">PYTHON · LOOPS</span><h1 style="margin-top:10px">حلقة for ودالة range</h1>
+   <p>درس تفاعلي من خمسة عشر محطة: شرح مبسّط، ثم نشاط إشارة المرور وبطاقات الاستجابة الحركية. وفي نهاية كل سؤال مختبر بايثون تجرّبين فيه الحل بنفسك.</p>
+   <div class="acts"><button class="btn go" data-a="open" data-v="${next.id}">${solvedCount() ? 'تابعي من حيث توقفتِ' : 'ابدئي الدرس'}</button><button class="btn ghost" data-a="guide">دليل المعلمة</button></div></div>
+   <div class="sig">${lightSvg(46)}<div class="rules"><b>الألوان نفسها</b>لكن معناها يتغير في كل محطة: كشف الصحة، ثم الرأي، ثم الحركة.</div></div></section>${sections}`;
+}
+
+function lessonPage(st, it) {
+  const outHidden = it.hide && !S.rev;
+  const hasLab = !it.hide || S.rev;
+  return `<article class="card"><div class="qhead"><span class="pill">السؤال ${S.i + 1} من ${st.items.length}</span></div><h2 style="font-size:1.5rem;margin:6px 0">${it.title}</h2>
+   <div class="lesson-body">${it.html}</div>
+   ${it.code ? `<div class="pair" style="margin-top:8px"><div>${codeBlock(it.code)}</div><div>${it.output ? (outHidden ? `<div class="outv" style="min-height:90px;display:grid;place-items:center"><button class="btn sm" data-a="reshow">اكشفي الناتج</button></div>` : `<div class="lbl muted" style="font-weight:800;font-size:.8rem">الناتج</div>${outBlock(it.output)}`) : ''}</div></div>` : ''}
+   ${it.note && !outHidden ? `<p class="note">${esc(it.note)}</p>` : ''}</article>${hasLab && it.lab ? labHTML(st.id + '-' + S.i, it.lab) : ''}`;
+}
+function questionPage(st, it) {
+  if (TPRK.includes(st.kind)) return tprPage(st, it);
+  const k = modeOf(st, it), opts = optsFor(st, it), four = k === 'abcd' || k === 'conf';
+  const stage = k === 'conf' && S.pick && !S.rev;
+  let body = `<div class="qhead"><span class="pill en">${st.kind === 'speed' ? it.label : st.en}</span><span class="pill">السؤال ${S.i + 1} من ${st.items.length}</span>${it.type ? `<span class="pill">${it.type}</span>` : ''}</div>
+   <p class="stmt">${fmt(it.q)}</p>${it.code ? codeBlock(it.code) : ''}`;
+  if (st.kind === 'tl-opinion' || st.kind === 'tl-show' || st.kind === 'tl-move') body += `<p class="muted" style="font-weight:700">${['g','y','r'].map(c => `<span class="lean ${c}">${st.legend[c]}</span>`).join(' ')}</p>`;
+  if (k === 'spin') body += `<div class="spin">${fig('spin', { size:150 })}</div>`;
+  else body += `<div class="opts ${four ? 'four' : ''}">${opts.map(o => {
+    const cls = [o.cls || '', o.txt ? 'txt' : '', S.pick === o.id ? 'pick' : '', S.rev && S.pick && S.pick !== o.id ? 'dim' : '', S.rev && it.ans === o.id ? 'right' : ''].join(' ');
+    return `<button class="o ${cls}" data-a="pick" data-v="${o.id}" ${S.rev || stage ? 'disabled' : ''}>${o.letter ? `<span class="L">${o.letter}</span>` : ''}${o.vis || ''}${o.txt ? `<span class="tx">${fmt(o.label)}${o.sub ? `<span class="sub" style="display:block;color:var(--ink2)">${o.sub}</span>` : ''}</span>` : `<span>${o.label}</span>${o.sub ? `<span class="sub">${o.sub}</span>` : ''}`}</button>`; }).join('')}</div>`;
+  if (stage) body += `<p class="stmt" style="font-size:1.1rem;margin-top:16px">ما مدى ثقتك بإجابتك؟</p><div class="conf5">${window.TPR.find(s => s.id === 'conf').scale.map(c => `<button data-a="setconf" data-v="${c[0]}"><b>${c[0]}</b>${c[1]}</button>`).join('')}</div>`;
+  if (!S.rev && !stage) body += `<div class="actions"><span class="muted">فكّري ثم اختاري${k === 'spin' ? '' : ' (أو اكشفي الحل مباشرة)'}</span><div class="tools"><button class="btn sm ghost" data-a="count">٣ … ٢ … ١</button><button class="btn sm" data-a="reveal">👁 اكشفي الحل</button></div></div>`;
+  if (S.rev) body += revealHTML(st, it, k, opts);
+  return `<article class="card">${body}</article>${S.rev && it.lab ? labHTML(st.id + '-' + S.i, it.lab) : ''}`;
+}
+function lampBox(c) { return `<div class="lampbox">${lightOn(c, 58)}</div>`; }
+function revealHTML(st, it, k, opts) {
+  const find = id => opts.find(o => o.id === id), aid = it.ans || it.lean, ao = find(aid);
+  let head = '';
+  const scored = it.ans && !it.evidence && it.ans !== 'spin';
+  if (it.evidence) head = `<div class="v">بعد عرض الدليل: الإجابة ${optLabel(find(it.after))}</div>`;
+  else if (scored) head = S.pick ? (S.pick === it.ans ? `<div class="v ok">✔ إجابة صحيحة: ${esc(optLabel(ao))}</div>` : `<div class="v no">✖ لنراجع معًا. الإجابة الصحيحة: ${esc(optLabel(ao))}</div>`) : `<div class="v">الإجابة: ${esc(optLabel(ao))}</div>`;
+  else if (it.lean) head = `<div class="v">${S.pick ? `اخترتِ: <span class="lean ${/^[gyr]$/.test(S.pick) ? S.pick : ''}">${esc(optLabel(find(S.pick)))}</span> · ` : ''}الدليل يميل إلى: ${esc(optLabel(find(it.lean)))}</div><p class="muted">لكن رأيك مقبول إذا برّرتِه بدليل من الدرس.</p>`;
+  else head = `<div class="v">${S.pick ? esc(optLabel(find(S.pick))) : ''}</div>`;
+  let body = '';
+  if (k === 'tl-move' && it.ans) body += `<div class="sb h"><b>الحركة:</b> ${st.moves[it.ans]}</div>`;
+  if (it.why) body += `<div class="sb h"><b>${it.lean && !it.ans ? 'نقطة للنقاش' : 'لماذا؟'}</b> ${fmt(it.why)}</div>`;
+  if (it.fix) body += `<div class="sb"><b>صحّحيها:</b> ${fmt(it.fix)}</div>`;
+  if (it.hint) body += `<div class="sb h">💡 <b>دليل من الدرس:</b> ${fmt(it.hint)}</div>`;
+  if (it.explain) body += `<div class="sb">${esc(it.explain)}</div>`;
+  if (it.tip) body += `<div class="sb">🗣 ${esc(it.tip)}</div>`;
+  if (k === 'conf' && S.conf && S.pick) {
+    const ok = S.pick === it.ans, c = S.conf;
+    body += `<div class="sb">ثقتك: <b>${c} من 5</b> — ${ok ? (c >= 4 ? 'إجابة صحيحة وثقة عالية، ممتاز!' : 'إجابتك صحيحة، ثقي بنفسك أكثر.') : (c >= 4 ? 'كنتِ واثقة لكن الإجابة تحتاج مراجعة، وهذه فرصة للتعلم.' : 'لا بأس، حيرتك طبيعية، راجعي التفسير ثم جرّبي المختبر.')}</div>`;
+  }
+  if (st.kind === 'tl-opinion') {
+    const key = st.id + S.i, t = S.tally[key] || { g:0, y:0, r:0 }, tot = Math.max(1, t.g + t.y + t.r);
+    body += `<div class="tally"><h4>📊 كم طالبة رفعت كل لون؟</h4>${['g','y','r'].map(c => `<div class="trow"><button data-a="tally" data-v="${key}|${c}|-1">−</button><b>${t[c]}</b><button data-a="tally" data-v="${key}|${c}|1">+</button><div class="bar2"><i style="width:${t[c] / tot * 100}%;background:var(--${c === 'g' ? 'go' : c === 'y' ? 'wait' : 'stop'})"></i></div><span style="min-width:140px">${st.legend[c]}</span></div>`).join('')}</div>`;
+  }
+  const lamp = it.ans && /^[gyr]$/.test(it.ans) ? lampBox(it.ans) : '';
+  const wrong = scored && S.pick && S.pick !== it.ans;
+  return `<div class="reveal${wrong ? ' shake' : ' bounce'}"><div class="rv">${lamp}<div style="flex:1">${head}${body}</div></div></div>`;
+}
+function challengePage(st) {
+  const id = st.id + '-ch';
+  return `<article class="card" style="border-top:6px solid ${st.color}"><div class="qhead"><span class="pill">تحدي نهاية المحطة</span></div><h2 style="font-size:1.5rem;margin:6px 0">اجمعي ما تعلمتِه في هذه المحطة</h2><p class="muted">هذا التحدي أطول قليلًا من تدريبات الأسئلة. اكتبي الحل بنفسك قبل أن تطلبي المساعدة.</p></article>${labHTML(id, st.challenge)}`;
+}
+function summaryPage(st) {
+  const ids = labIds(st), d = ids.filter(x => SAVE.solved[x]).length, st5 = ids.filter(x => SAVE.solved[x] && SAVE.solved[x].star).length;
+  const scoredKeys = st.items.map((it, i) => it.ans && !it.evidence && it.ans !== 'spin' ? st.id + '-' + i : null).filter(Boolean);
+  const right = scoredKeys.filter(k => SAVE.scores[k]).length;
+  const stars = Math.round(st5 / ids.length * 5);
+  const nx = ALL[ALL.indexOf(st) + 1];
+  return `<article class="card done"><h2>🏁 أنهيتِ محطة «${st.ar}»</h2><div class="stars">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</div>
+   <div class="stats"><div><b>${d} من ${ids.length}</b>مختبرات محلولة</div><div><b>${st5}</b>حلول بلا مساعدة</div>${scoredKeys.length ? `<div><b>${right} من ${scoredKeys.length}</b>إجابات صحيحة</div>` : ''}</div>
+   ${d < ids.length ? '<p class="muted">يمكنك الرجوع إلى أي سؤال من الأرقام في الأعلى وإكمال المختبرات الناقصة.</p>' : ''}
+   <div class="actions" style="justify-content:center"><button class="btn ghost" data-a="home">الرئيسية</button>${nx ? `<button class="btn go" data-a="nextst">المحطة التالية: ${nx.ar}</button>` : ''}</div></article>`;
+}
+function renderStation() {
+  const st = S.st, n = st.items.length, ids = labIds(st);
+  const stepper = `<div class="stepper" style="--c:${st.color}">${st.items.map((_, i) => `<button class="${i === S.i ? 'on' : ''} ${SAVE.solved[ids[i]] ? 'd' : ''}" data-a="goto" data-v="${i}" aria-label="السؤال ${i + 1}">${i + 1}</button>`).join('')}<button class="tr ${S.i === n ? 'on' : ''} ${SAVE.solved[ids[n]] ? 'd' : ''}" data-a="goto" data-v="${n}">★ التحدي</button><button class="tr ${S.i > n ? 'on' : ''}" data-a="goto" data-v="${n + 1}">النتيجة</button></div>`;
+  let page;
+  if (S.i < 0) page = introPage(st);
+  else if (S.i < n) page = st.kind === 'lesson' ? lessonPage(st, st.items[S.i]) : questionPage(st, st.items[S.i]);
+  else if (S.i === n) page = challengePage(st); else page = summaryPage(st);
+  const itn = S.i >= 0 && S.i < n ? st.items[S.i] : null, blocked = itn && TPRK.includes(st.kind) && !(S.t.stage === 3 && tprCanNext(st, itn));
+  const nav = S.i >= 0 && S.i <= n ? `<div class="actions"><button class="btn ghost" data-a="prev">→ السابق</button>${blocked ? '<span></span>' : `<button class="btn" data-a="next">${S.i === n ? 'إنهاء المحطة ✔' : S.i === n - 1 ? 'إلى التحدي ←' : 'التالي ←'}</button>`}</div>` : '';
+  return `<div class="crumb" style="--c:${st.color}"><button class="btn sm ghost" data-a="home">← الرئيسية</button><span class="en">${st.en}</span><h1>${st.ar}</h1></div>${roadHTML(st)}${zonesHTML(st)}${S.i < 0 ? '' : stepper}${page}${nav}`;
+}
+function render() {
+  $('#app').innerHTML = bar() + `<main>${S.st ? renderStation() : renderHome()}</main>`;
+  updateProg();
+  if (S.st) {
+    const n = S.st.items.length;
+    if (S.i >= 0 && S.i < n) { const it = S.st.items[S.i], id = S.st.id + '-' + S.i; if (document.getElementById('lab-' + id)) initLab(id, it.lab); }
+    else if (S.i === n) initLab(S.st.id + '-ch', S.st.challenge);
+  }
+}
+function go(h) { try { history.replaceState(null, '', '#' + h); } catch (e) { try { location.hash = h; } catch (e2) {} } }
+function applyHash() { const h = (location.hash || '').slice(1), st = ALL.find(s => s.id === h); if (st) { S.st = st; S.i = startIdx(st); } else S.st = null; reset(); render(); }
+window.addEventListener('hashchange', applyHash);
+applyHash();
+window.__app = { S, A, render, LAB, SAVE, ALL };
+})();
+
+</script>
+</body>
+</html>
